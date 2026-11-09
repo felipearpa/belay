@@ -106,10 +106,14 @@ first_install() {
 
 # --- Update ---------------------------------------------------------------------------------
 
+is_top_folder_of_git_work_tree() {
+  local inside_work_tree_then_path_up_to_top
+  inside_work_tree_then_path_up_to_top="$(git -C "$1" rev-parse --is-inside-work-tree --show-cdup 2>/dev/null)" || return 1
+  [[ "$inside_work_tree_then_path_up_to_top" == "true" ]]
+}
+
 stop_unless_git_clone() {
-  local top
-  top="$(git -C "$clone" rev-parse --show-toplevel 2>/dev/null)" || top=""
-  [[ -n "$top" && "$top" == "$(cd "$clone" && pwd -P)" ]] && return
+  is_top_folder_of_git_work_tree "$clone" && return
   stop_install "$shown exists but is not a git clone" \
     "To install afresh, move it away or set BELAY_HOME to another folder."
 }
