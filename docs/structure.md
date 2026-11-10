@@ -6,6 +6,7 @@ A development system built on agents, shared by Claude Code and Codex. Your clon
 flowchart LR
   subgraph SRC["belay clone (source)"]
     README["README.md<br/>what it is, how to install, how to extend"]
+    DOCI["docs/install.md<br/>the install in full"]
     GET["get.sh<br/>piped from curl: clones or updates, then hands off"]
     INSTALL["install.sh<br/>one-screen picker"]
     BUILD["build.sh<br/>generates, links; --check, --dry-run"]
@@ -37,15 +38,16 @@ flowchart LR
 
   subgraph REPO["Each repository"]
     AGENTS["AGENTS.md<br/>build, test, code metrics, conventions"]
-    FAP[".fap/slug/<br/>proposal.md · plan.md · design/ · log.md · verification.md · verification/"]
+    FAP[".fap/slug/<br/>proposal.md · plan.md · design/ · log.md · verification.md · verification/ · snapshots/"]
   end
 
   COMMON --> IMPL & VER & REV & RF & FR & IA
   IMPL & VER & REV & RF & FR & IA --> BUILD --> CA
   SK --> BUILD --> CS
   BUILD --> CX
-  GET -- "on a terminal" --> INSTALL
-  GET -- "--all without one" --> BUILD
+  GET -- "no saved selection, on a terminal" --> INSTALL
+  GET -- "--all without a terminal" --> BUILD
+  GET -- "update: --dry-run, then the saved selection" --> BUILD
   INSTALL -- "--dry-run, then the flags" --> BUILD
   CONF -. "selection" .-> BUILD
   LIB -. "sourced by" .-> INSTALL & BUILD
@@ -120,7 +122,7 @@ flowchart LR
   UR -- "approved" --> C["commit by the orchestrator"]
   C --> T["tick tasks, close the log"]
   T -- "next slice: run again" --> S
-  T -- "last slice" --> PR["reviewer's plan review<br/>over the whole diff and its metrics"]
+  T -- "last slice" --> PR["reviewer's plan review<br/>over the whole diff and its metrics;<br/>verifier checks every Done when item"]
 ```
 
 ## Extending it
