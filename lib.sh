@@ -34,7 +34,22 @@ frontmatter_value() {
 
 shown_path() { if [[ "$1" == "$HOME/"* ]]; then echo "~/${1#"$HOME/"}"; else echo "$1"; fi; }
 
-is_clone_link() { [[ -L "$1" && "$(readlink "$1")" == "$here/skills/$(basename "$1")" ]]; }
+# A folder reached through a symlink has more than one spelling; links and notices keep the
+# spelling they were written with, so they are compared by the folder they resolve to.
+same_folder() {
+  local first second
+  [[ "$1" == "$2" ]] && return 0
+  first="$(cd -P "$1" 2>/dev/null && pwd)" && second="$(cd -P "$2" 2>/dev/null && pwd)" \
+    && [[ -n "$first" && "$first" == "$second" ]]
+}
+
+links_into_clone() {
+  local target
+  [[ -L "$1" ]] || return 1
+  target="$(readlink "$1")"
+  [[ "$target" == /*/skills/* ]] && same_folder "${target%/skills/*}" "$here"
+}
+is_clone_link() { links_into_clone "$1" && [[ "$(readlink "$1")" == */skills/"$(basename "$1")" ]]; }
 
 notice_line() {
   case "$1" in
@@ -42,11 +57,20 @@ notice_line() {
     *) head -n 1 "$1" ;;
   esac
 }
+# The clone as the notice names it, shortened by shown_path.
+notice_clone() {
+  local clone
+  clone="$(notice_line "$1")"
+  clone="${clone#"# Generated from "}"
+  echo "${clone%" $generated_mark"}"
+}
 is_generated() {
-  local line
-  line="$(notice_line "$1")"
-  if [[ -n "${2:-}" ]]; then [[ "$line" == "# Generated from $(shown_path "$2") $generated_mark" ]]
-  else [[ "$line" == "# Generated from "*" $generated_mark" ]]; fi
+  local clone
+  [[ "$(notice_line "$1")" == "# Generated from "*" $generated_mark" ]] || return 1
+  [[ -n "${2:-}" ]] || return 0
+  clone="$(notice_clone "$1")"
+  [[ "$clone" != "~/"* ]] || clone="$HOME/${clone#"~/"}"
+  same_folder "$clone" "$2"
 }
 
 has_generated_agent() {
