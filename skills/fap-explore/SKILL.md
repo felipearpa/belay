@@ -2,6 +2,7 @@
 name: fap-explore
 description: Think an idea through with the user by investigating the codebase, weighing options, and clarifying what to build before anything is implemented. Ends in .fap/<slug>/proposal.md, what is proposed and why, which three agents with a fresh context challenge on the user's yes and fap-slice plans from. Use when the user wants to think something through, understand how part of the code works, or shape an idea before implementing it.
 argument-hint: "[idea or problem]"
+allowed-tools: Read(//**/skills/fap-slice/references/slicing.md) Read(//**/skills/fap-build/references/templates.md)
 ---
 
 This session thinks with the user and builds nothing. Read the code, weigh the options,

@@ -2,6 +2,7 @@
 name: fap-slice
 description: Turn a goal, or a .fap/<slug>/proposal.md written by fap-explore, into a .fap/<slug>/plan.md ready to build. Complete the goal, cut the work into slices with their tracer, check the cut against the slicing rules, and stop without implementing anything. Use when the user wants the plan and its tasks written or reviewed.
 argument-hint: "[goal, or the slug of a .fap/ proposal or plan]"
+allowed-tools: Read(//**/skills/fap-slice/references/slicing.md) Read(//**/skills/fap-build/references/templates.md)
 ---
 
 # Plan in slices

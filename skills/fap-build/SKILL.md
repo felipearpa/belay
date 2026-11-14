@@ -2,6 +2,7 @@
 name: fap-build
 description: Build the next pending slice of a .fap/<slug>/plan.md written by fap-slice. The slice runs through the implementer, verifier, and reviewer agents, waits for the user's review, and this session commits it, tracks progress under .fap/, and brings questions to the user. Use when the user wants a slice built, or is continuing an unfinished plan.
 argument-hint: "[slug]"
+allowed-tools: Read(//**/skills/fap-slice/references/slicing.md) Read(//**/skills/fap-build/references/templates.md)
 ---
 
 # Build a slice
