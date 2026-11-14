@@ -34,14 +34,25 @@ frontmatter_value() {
 
 shown_path() { if [[ "$1" == "$HOME/"* ]]; then echo "~/${1#"$HOME/"}"; else echo "$1"; fi; }
 
-# A link build.sh made: it points at the skill of the same name in the clone's skills folder.
 is_clone_link() { [[ -L "$1" && "$(readlink "$1")" == "$here/skills/$(basename "$1")" ]]; }
 
-# An agent generated from any clone counts; a skill link counts only into this clone.
+notice_line() {
+  case "$1" in
+    *.md) awk 'NR == 1 && $0 != "---" { exit } NR == 2 { print; exit }' "$1" ;;
+    *) head -n 1 "$1" ;;
+  esac
+}
+is_generated() {
+  local line
+  line="$(notice_line "$1")"
+  if [[ -n "${2:-}" ]]; then [[ "$line" == "# Generated from $(shown_path "$2") $generated_mark" ]]
+  else [[ "$line" == "# Generated from "*" $generated_mark" ]]; fi
+}
+
 has_generated_agent() {
-  local file
-  for file in "$1"/agents/*."$2"; do
-    [[ -f "$file" ]] && grep -q "$generated_mark" "$file" && return 0
+  local home="$1" extension="$2" only_from_clone="${3:-}" file
+  for file in "$home"/agents/*."$extension"; do
+    [[ -f "$file" ]] && is_generated "$file" "$only_from_clone" && return 0
   done
   return 1
 }
@@ -56,9 +67,7 @@ has_skill_link() {
 claude_home="${CLAUDE_HOME:-$HOME/.claude}"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
 
-# Sets targets and skills from the file, or selection_error to the shell's first complaint
-# and returns 1 when the file doesn't source cleanly. The final "." keeps an empty last
-# list from being lost to command substitution.
+# The final "." keeps an empty last list from being lost to command substitution.
 read_selection() {
   local file="$1" saved
   if ! saved="$(targets="" skills=""

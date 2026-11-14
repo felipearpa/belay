@@ -9,8 +9,8 @@ checks below are the build.
 
 Run them from the repository root. Check 1 is the quick one while editing; check 3
 covers it and runs before a commit, with check 4 when an agent source changed, check 5
-when `.claude-plugin/` did, and check 6 when a script did. Never run any of them against your real `~/.claude` or
-`~/.codex`.
+when `.claude-plugin/` did, and check 6 when a script did. Never run any of them against
+your real `~/.claude` or `~/.codex`.
 
 1. Install everything into a temporary home and confirm nothing is stale. `--all`
    ignores the selection saved in `install.conf`, so every skill and agent is checked.
@@ -129,7 +129,7 @@ when `.claude-plugin/` did, and check 6 when a script did. Never run any of them
    git -C "$clone" log -1 --format=%s   # prints "update 2"
    grep '^wrote' "$tmp/update.log"   # only the Codex fap-reviewer.toml
    find "$tmp/home/.claude" ! -type d   # prints nothing
-   in_tmp "$clone/build.sh" --check | tail -1   # exits 0, prints "up to date"
+   in_tmp "$clone/build.sh" --check   # exits 0, ends with "up to date"
    rm -rf "$tmp"
    ```
 

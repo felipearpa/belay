@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 # Generates the Claude Code and Codex registrations for every agent under agent-sources/
 # (from its AGENT.md and agent-sources/common.md) and links the skills under skills/ into
-# each CLI's skills folder, for the selection the flags describe, else
-# the one saved in install.conf, else everything, and removes what it installed earlier
-# that the selection no longer holds. --dry-run lists what that run would do, file by
-# file, and writes nothing. --render-agents writes the finished Claude Code agents into
-# agents/, the files committed for the plugin, removes those whose source is gone, and
-# writes nothing else; with --check it only reports what in agents/ is stale, missing,
-# orphaned, or not rendered there. --uninstall removes what build.sh installed, from both
-# CLIs or the one named, saving the other's install as the selection; it never reads
-# install.conf.
+# each CLI's skills folder, for the selection the flags describe, else the one saved in
+# install.conf, else everything, and removes what it installed earlier that the selection
+# no longer holds. --dry-run lists what that run would do, file by file, and writes
+# nothing. --render-agents writes only agents/, the files committed for the plugin.
+# --uninstall never reads install.conf and saves the install it keeps as the selection.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,8 +19,6 @@ usage() {
   echo "$usage_line" >&2
   exit 2
 }
-
-# --- Selection ----------------------------------------------------------------------------
 
 targeted() { in_list "$1" "$targets"; }
 
@@ -42,14 +36,14 @@ known_in_order() {
 }
 
 set -f # so a name like '*' from the flags or install.conf isn't globbed
-check=0; dry_run=0; all=0; flagged=0; render_only=0; uninstall=0; skills_given=0
+check=0; dry_run=0; all=0; ignore_conf=0; flagged=0; render_agents=0; uninstall=0; skills_given=0
 targets=""; skills=""
 while (( $# )); do
   case "$1" in
     --check) check=1 ;;
     --dry-run) dry_run=1 ;;
-    --all) all=1 ;;
-    --render-agents) render_only=1 ;;
+    --all) all=1; ignore_conf=1 ;;
+    --render-agents) render_agents=1 ;;
     --uninstall) uninstall=1 ;;
     --claude) targets="$targets claude"; flagged=1 ;;
     --codex) targets="$targets codex"; flagged=1 ;;
@@ -65,19 +59,18 @@ done
 (( check && flagged )) && usage "--check takes no selection"
 (( check && dry_run )) && usage "--check and --dry-run can't be combined"
 if (( uninstall )); then
-  (( check || all || render_only || skills_given )) && usage "--uninstall takes no other option than --dry-run, --claude or --codex"
+  (( check || all || render_agents || skills_given )) && usage "--uninstall takes no other option than --dry-run, --claude or --codex"
   removed_from="$(known_in_order target "claude codex" "${targets:-claude codex}" "the flags")"
-  targets=""; flagged=0
-  all=1 # so install.conf is neither read nor saved as a selection
+  targets=""; flagged=0; ignore_conf=1
 fi
-if (( render_only )); then
+if (( render_agents )); then
   (( dry_run || all || flagged )) && usage "--render-agents takes no other option than --check"
-  all=1 # renders every agent, and never reads or writes install.conf
+  ignore_conf=1
 fi
 
 if (( flagged )); then
   origin="the flags"
-elif (( ! all )) && [[ -f "$conf" ]]; then
+elif (( ! ignore_conf )) && [[ -f "$conf" ]]; then
   origin="install.conf"
   read_selection "$conf" || {
     echo "build.sh: $conf couldn't be read${selection_error:+ ($selection_error)}; fix it or delete it, then run build.sh again" >&2
@@ -91,8 +84,10 @@ targets="$(known_in_order target "claude codex" "$targets" "$origin")" || exit 2
 skills="$(known_in_order skill "flow $optional_skills" "$skills" "$origin")" || exit 2
 [[ -n "$targets" ]] || usage "no target in $origin; add --claude, --codex, or both"
 
+save_selection() { printf 'targets="%s"\nskills="%s"\n' "$1" "$2" > "$conf"; }
+
 if (( flagged && ! dry_run )); then
-  printf 'targets="%s"\nskills="%s"\n' "$targets" "$skills" > "$conf"
+  save_selection "$targets" "$skills"
 elif [[ "$origin" == install.conf ]]; then
   echo "using the selection in $conf"
 fi
@@ -100,7 +95,7 @@ fi
 skill_folders="$(skill_folders_of "$skills")"
 set +f
 
-if (( render_only )); then
+if (( render_agents )); then
   notice="Generated from agent-sources/ $generated_mark"
 else
   notice="Generated from $(shown_path "$here") $generated_mark"
@@ -186,6 +181,11 @@ print_planned() {
 
 exists() { [[ -e "$1" || -L "$1" ]]; }
 
+finish_check() {
+  (( stale == 0 )) && echo "up to date"
+  exit $stale
+}
+
 place() {
   local rendered="$1" target="$2" overwrite_remark="${3:-}" status=overwrite
   if cmp -s "$rendered" "$target"; then planned unchanged "$target"; return; fi
@@ -196,7 +196,7 @@ place() {
 }
 
 removals=0
-remove_from_home() {
+remove_placed() {
   local path="$1" reason="$2"
   removals=$(( removals + 1 ))
   if (( check )); then echo "stale: $path ($reason)"; stale=1
@@ -207,16 +207,12 @@ remove_from_home() {
 home_of() { if [[ "$1" == claude ]]; then echo "$claude_home"; else echo "$codex_home"; fi; }
 when_targeted() { if targeted "$1"; then echo "$2"; fi; }
 
-# --- Agents -----------------------------------------------------------------------------
-
 agent_overwrite_remark() {
-  [[ -f "$1" ]] && ! grep -q "$generated_mark" "$1" && echo "(not from build.sh; no backup)"
+  [[ -f "$1" ]] && ! is_generated "$1" && echo "(not from build.sh; no backup)"
 }
 
-# Validates every agent source and renders it into $tmp as <name>.md and <name>.toml,
-# listing the names in order in names. Writes nowhere else.
-names=()
-render_agents() {
+names=""
+render_into_tmp() {
   local agent_md dir name description tools body
   [[ -f "$here/agent-sources/common.md" ]] || { echo "Missing agent-sources/common.md" >&2; exit 1; }
   for agent_md in "$here"/agent-sources/*/AGENT.md; do
@@ -238,7 +234,7 @@ render_agents() {
     fi
     render_claude > "$tmp/$name.md"
     render_codex > "$tmp/$name.toml"
-    names+=("$name")
+    names="${names:+$names }$name"
   done
 }
 
@@ -252,54 +248,46 @@ remove_unselected_agents() {
   local folder="$1" extension="$2" wanted="$3" generated base
   for generated in "$folder"/*."$extension"; do
     [[ -f "$generated" ]] || continue
-    grep -q "$generated_mark" "$generated" || continue
+    is_generated "$generated" || continue
     base="$(basename "${generated%.*}")"
     in_list "$base" "$wanted" && continue
-    if in_list "$base" "$agent_sources"; then remove_from_home "$generated" "$removal_reason"
-    else remove_from_home "$generated" "no agent source"; fi
+    if in_list "$base" "$agent_sources"; then remove_placed "$generated" "$removal_reason"
+    else remove_placed "$generated" "no agent source"; fi
   done
 }
 
-# Removes the links in folder that point into the clone's skills folder at a skill that
-# is gone, or at one whose name isn't in wanted.
 remove_unselected_links() {
   local folder="$1" wanted="$2" link
   for link in "$folder"/*; do
     [[ -L "$link" && "$(readlink "$link")" == "$here/skills/"* ]] || continue
-    if [[ ! -e "$link" ]]; then remove_from_home "$link" "skill removed"
+    if [[ ! -e "$link" ]]; then remove_placed "$link" "skill removed"
     elif is_clone_link "$link" && ! in_list "$(basename "$link")" "$wanted"; then
-      remove_from_home "$link" "$removal_reason"
+      remove_placed "$link" "$removal_reason"
     fi
   done
 }
 
-# The finished agents committed in agents/, for the plugin; nothing in the homes changes.
-# One file per source is written, a generated file whose source is gone is removed, and
-# anything else there (the plugin would load it as an agent) is reported and left alone,
-# or under --check fails it. Hidden files, such as .DS_Store, aren't looked at.
-if (( render_only )); then
-  render_agents
-  for name in "${names[@]}"; do
+# The plugin loads agents/ as committed in git, and takes any file there for an agent;
+# git ignores .DS_Store.
+if (( render_agents )); then
+  render_into_tmp
+  for name in $names; do
     place "$tmp/$name.md" "$here/agents/$name.md"
   done
-  remove_unselected_agents "$here/agents" md "${names[*]+${names[*]}}"
-  for entry in "$here"/agents/*; do
+  remove_unselected_agents "$here/agents" md "$names"
+  for entry in "$here"/agents/* "$here"/agents/.[!.]* "$here"/agents/..?*; do
     exists "$entry" || continue
+    [[ "$(basename "$entry")" != .DS_Store ]] || continue
     if [[ -f "$entry" && "$entry" == *.md ]]; then
-      in_list "$(basename "$entry" .md)" "${names[*]+${names[*]}}" && continue
-      grep -q "$generated_mark" "$entry" && continue
+      in_list "$(basename "$entry" .md)" "$names" && continue
+      is_generated "$entry" && continue
     fi
     if (( check )); then echo "foreign: $entry (not rendered from agent-sources/)"; stale=1
     else note "$entry is not rendered from agent-sources/ and the plugin would load it as an agent; left alone"; fi
   done
-  if (( check )); then
-    (( stale == 0 )) && echo "up to date"
-    exit $stale
-  fi
+  (( check )) && finish_check
   exit 0
 fi
-
-# --- Uninstall --------------------------------------------------------------------------
 
 extension_of() { if [[ "$1" == claude ]]; then echo md; else echo toml; fi; }
 cli_name() { if [[ "$1" == claude ]]; then echo "Claude Code"; else echo Codex; fi; }
@@ -308,7 +296,7 @@ installed_selection() {
   local home="$1" extension="$2" skill list=""
   for skill in flow $optional_skills; do
     if has_skill_link "$home" "$(skill_folders_of "$skill")" \
-        || { [[ "$skill" == flow ]] && has_generated_agent "$home" "$extension"; }; then
+        || { [[ "$skill" == flow ]] && has_generated_agent "$home" "$extension" "$here"; }; then
       list="${list:+$list }$skill"
     fi
   done
@@ -329,10 +317,22 @@ note_what_stays() {
   done
   for name in $agent_sources; do
     path="$home/agents/$name.$extension"
-    if [[ -f "$path" ]] && ! grep -q "$generated_mark" "$path"; then
+    if [[ -f "$path" ]] && ! is_generated "$path"; then
       note "$(shown_path "$path") wasn't generated by build.sh; left alone"
     fi
   done
+}
+
+# The clones other than this one that get.sh's update would find through the fap-* skill
+# links, one per line, read from each link as get.sh reads them.
+other_linked_clones() {
+  local link target
+  for link in "$claude_home"/skills/fap-* "$codex_home"/skills/fap-*; do
+    [[ -L "$link" ]] || continue
+    target="$(readlink "$link")"
+    [[ "$target" == */skills/"$(basename "$link")" && "${target%/skills/*}" != "$here" ]] || continue
+    echo "${target%/skills/*}"
+  done | sort -u
 }
 
 is_default_clone() { [[ -d "$HOME/.belay" && "$(cd "$HOME/.belay" && pwd -P)" == "$(cd "$here" && pwd -P)" ]]; }
@@ -356,10 +356,10 @@ if (( uninstall )); then
     if (( dry_run )); then
       conf_line="Would save $(cli_name "$kept")'s install as the selection in $conf: --$kept --skills ${kept_skills// /,}"
     else
-      printf 'targets="%s"\nskills="%s"\n' "$kept" "$kept_skills" > "$conf"
+      save_selection "$kept" "$kept_skills"
       conf_line="Saved $(cli_name "$kept")'s install as the selection in $conf (--$kept --skills ${kept_skills// /,}); a plain ./build.sh reapplies it."
     fi
-  elif [[ -e "$conf" || -L "$conf" ]]; then
+  elif exists "$conf"; then
     if (( dry_run )); then conf_line="Would delete $conf, unread."
     else rm -f "$conf"; conf_line="Deleted $conf."; fi
   fi
@@ -374,9 +374,16 @@ if (( uninstall )); then
   fi
   links_left=0
   if [[ -n "$kept" ]] && has_skill_link "$(home_of "$kept")" "$(skill_folders_of "flow $optional_skills")"; then links_left=1; fi
-  if (( ! links_left )) && ! is_default_clone; then
+  others="$(other_linked_clones)"
+  if (( ! links_left )) && { [[ -n "$others" ]] || ! is_default_clone; }; then
     echo "warning: with no skill link into this clone left, the one-line command finds it only through BELAY_HOME;"
-    echo "  without it, it turns to ~/.belay, cloning Belay a second time when nothing is there. Pass"
+    if [[ -z "$others" ]]; then
+      echo "  without it, it turns to ~/.belay, cloning Belay a second time when nothing is there. Pass"
+    elif [[ "$others" == *$'\n'* ]]; then
+      echo "  without it, it stops, since the skill links left point into more than one other clone. Pass"
+    else
+      echo "  without it, it updates $(shown_path "$others"), which the skill links left point into. Pass"
+    fi
     echo "  BELAY_HOME=$(shown_path "$here") to bash, or run ./build.sh in this clone."
   fi
   (( dry_run || removals == 0 )) || echo "Restart running sessions to load the changes."
@@ -384,21 +391,17 @@ if (( uninstall )); then
 fi
 
 if in_list flow "$skills"; then
-  render_agents
-  for name in "${names[@]}"; do
+  render_into_tmp
+  for name in $names; do
     if targeted claude; then place "$tmp/$name.md" "$claude_home/agents/$name.md" "$(agent_overwrite_remark "$claude_home/agents/$name.md")"; fi
     if targeted codex; then place "$tmp/$name.toml" "$codex_home/agents/$name.toml" "$(agent_overwrite_remark "$codex_home/agents/$name.toml")"; fi
     (( dry_run )) || echo "$name: $(wc -w < "$tmp/$name.md" | tr -d ' ') words"
   done
 fi
 
-remove_unselected_agents "$claude_home/agents" md "$(when_targeted claude "${names[*]+${names[*]}}")"
-remove_unselected_agents "$codex_home/agents" toml "$(when_targeted codex "${names[*]+${names[*]}}")"
+remove_unselected_agents "$claude_home/agents" md "$(when_targeted claude "$names")"
+remove_unselected_agents "$codex_home/agents" toml "$(when_targeted codex "$names")"
 
-# --- Skills -----------------------------------------------------------------------------
-
-# Links target to the skill of the same name in this clone's skills folder. Any real file
-# or folder already at target is left alone and reported.
 link_into_clone() {
   local target="$1" source="$here/skills/$(basename "$1")"
   if [[ -L "$target" ]]; then
@@ -426,10 +429,7 @@ for cli in claude codex; do
   remove_unselected_links "$cli_skills" "$wanted"
 done
 
-if (( check )); then
-  (( stale == 0 )) && echo "up to date"
-  exit $stale
-fi
+(( check )) && finish_check
 if (( dry_run )); then
   print_planned
   exit 0

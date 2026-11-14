@@ -1,6 +1,6 @@
 # Structure of Belay
 
-A development system built on agents, shared by Claude Code and Codex. This repository is the source of everything. Installed as a Claude Code plugin, Claude Code copies it from git and loads its `skills/` and its committed `agents/`; installed through the scripts, your clone of it (`~/.belay` when `get.sh` made it) stays, and `build.sh` generates what each CLI reads.
+A development system built on agents, shared by Claude Code and Codex. This repository is the source of everything. As a Claude Code plugin, it is copied from git by Claude Code, which loads its `skills/` and its committed `agents/`; through the scripts, it stays where you cloned it (`~/.belay` when `get.sh` made it), and `build.sh` generates what each CLI reads.
 
 ```mermaid
 flowchart LR

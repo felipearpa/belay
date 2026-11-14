@@ -8,21 +8,12 @@ uninstalling, and Codex.
 
 ## The plugin
 
-In Claude Code, the plugin is the whole install:
+The [README](../README.md#install) gives the two commands that install the plugin, the
+names its commands carry, and why to pick it or the scripts for Claude Code, not both.
 
-```text
-/plugin marketplace add felipearpa/belay
-/plugin install belay@belay
-```
-
-It always brings the three skills and the six agents. Its commands carry its name:
-`/belay:fap-explore`, `/belay:fap-slice`, `/belay:fap-build`, and the agents as
-`belay:fap-implementer` and so on; a bare `/fap-explore` also runs the plugin's skill
-when no other command has that name. Pick it or the scripts for Claude Code, not both:
-with both, every skill and agent is listed twice and a skill may start either copy of an
-agent.
-
-To update, refresh the marketplace, then the plugin, and restart running sessions:
+To update it, run `/plugin` in a session and update Belay there, or, in a shell, refresh
+the marketplace, then the plugin; either way, restart running sessions afterwards.
+`/plugin` also removes it.
 
 ```bash
 claude plugin marketplace update belay
@@ -31,9 +22,10 @@ claude plugin update belay@belay
 
 The plugin has no version number, so every commit to the repository is an update.
 Claude Code keeps its own copy of the whole repository under `~/.claude/plugins/`,
-scripts included, and loads only its `skills/` and `agents/`. Don't run `get.sh`,
-`install.sh`, or `build.sh` from that copy: they would install the scripts' copy next to
-the plugin, linked into a folder the next plugin update replaces.
+scripts included, and loads only its `skills/` and `agents/`. Don't run the scripts from
+that copy: `get.sh` ignores where it runs from and would add a script install next to the
+plugin, and `install.sh` and `build.sh` would link the skills into a folder the next
+plugin update replaces.
 
 ### Switching to the plugin
 
@@ -216,7 +208,8 @@ The clone stays, and the last lines say where; delete it yourself when nothing u
 After uninstalling from both, the one-line command finds nothing installed: on a
 terminal it opens the picker, and without one it stops and says so. With the skill links
 gone it finds a clone outside `~/.belay` only through `BELAY_HOME`, so run without it,
-it would clone Belay again into `~/.belay`; the uninstall warns when that applies.
+it would clone Belay again into `~/.belay`, or update another clone when skill links into
+that one remain; the uninstall warns when either applies.
 
 ## Codex
 

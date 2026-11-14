@@ -86,11 +86,10 @@ In Claude Code, install Belay as a plugin:
 ```
 
 The plugin brings the three skills and the six agents, with no clone and nothing
-written by Belay's scripts into your home folder; `/plugin` updates and removes it.
-Its commands carry the plugin's name: the skills are `/belay:fap-explore`,
-`/belay:fap-slice`, and `/belay:fap-build`, and the agents are `belay:fap-implementer`
-and so on. A bare `/fap-explore` also runs the plugin's skill when no other command has
-that name.
+written by Belay's scripts into your home folder. Its commands carry the plugin's name:
+the skills are `/belay:fap-explore`, `/belay:fap-slice`, and `/belay:fap-build`, and the
+agents are `belay:fap-implementer` and so on. A bare `/fap-explore` also runs the
+plugin's skill when no other command has that name.
 
 Pick one install for Claude Code, the plugin or the scripts below, not both. With both,
 every skill and agent is listed twice, bare and with `belay:`, and a skill may start
