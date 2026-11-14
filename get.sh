@@ -19,6 +19,12 @@ through_links="the skill links"
 claude_home="${CLAUDE_HOME:-$HOME/.claude}"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
 shown_path() { if [[ "$1" == "$HOME/"* ]]; then echo "~/${1#"$HOME/"}"; else echo "$1"; fi; }
+same_folder() {
+  local first second
+  [[ "$1" == "$2" ]] && return 0
+  first="$(cd -P "$1" 2>/dev/null && pwd)" && second="$(cd -P "$2" 2>/dev/null && pwd)" \
+    && [[ -n "$first" && "$first" == "$second" ]]
+}
 
 # stdin is the pipe from curl, so a terminal means stdout is one and /dev/tty opens.
 has_terminal() { [[ -t 1 ]] && (: </dev/tty) 2>/dev/null; }
@@ -56,7 +62,7 @@ clone_of_link() {
   local target
   [[ -L "$1" ]] || return 0
   target="$(readlink "$1")"
-  [[ "$target" == */skills/"$(basename "$1")" ]] && echo "${target%/skills/*}"
+  [[ "$target" == /*/skills/"$(basename "$1")" ]] && echo "${target%/skills/*}"
   return 0
 }
 
@@ -66,11 +72,16 @@ clones_of_skill_links() {
   for link in "$1"/fap-*; do clone_of_link "$link"; done
 }
 
+# Links written through two spellings of one folder name one clone, under the first seen.
 linked_clones() {
-  {
-    clones_of_skill_links "$claude_home/skills"
-    clones_of_skill_links "$codex_home/skills"
-  } | sort -u
+  local found kept clones=""
+  while IFS= read -r found; do
+    while IFS= read -r kept; do
+      [[ -n "$kept" ]] && same_folder "$found" "$kept" && continue 2
+    done <<< "$clones"
+    clones+="$found"$'\n'
+  done < <(clones_of_skill_links "$claude_home/skills"; clones_of_skill_links "$codex_home/skills")
+  printf '%s' "$clones" | sort
 }
 
 stop_on_mixed_links() {
@@ -93,7 +104,13 @@ find_clone() {
   clone="$HOME/.belay"; found_through="the default folder"
 }
 
-installed_from_clone() { linked_clones | grep -qxF "$clone"; }
+installed_from_clone() {
+  local linked
+  while IFS= read -r linked; do
+    [[ -n "$linked" ]] && same_folder "$linked" "$clone" && return 0
+  done <<< "$(linked_clones)"
+  return 1
+}
 
 # --- First install ---------------------------------------------------------------------------
 

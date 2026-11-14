@@ -2,6 +2,7 @@
 name: fap-explore
 description: Think an idea through with the user by investigating the codebase, weighing options, and clarifying what to build before anything is implemented. Ends in .fap/<slug>/proposal.md, what is proposed and why, which three agents with a fresh context challenge on the user's yes and fap-slice plans from. Use when the user wants to think something through, understand how part of the code works, or shape an idea before implementing it.
 argument-hint: "[idea or problem]"
+allowed-tools: Read(//**/skills/fap-slice/references/slicing.md) Read(//**/skills/fap-build/references/templates.md)
 ---
 
 This session thinks with the user and builds nothing. Read the code, weigh the options,
@@ -60,7 +61,8 @@ something first, name it and stop there; when the thinking was the value, leave 
 
 With the proposal written, offer to have it challenged by agents that weren't in this
 conversation. If the user says yes, start these three at the same time, each with a
-brief of a few lines:
+brief of a few lines, by the name this session lists: the bare name, or `belay:<name>`
+under the Claude Code plugin:
 
 - `fap-reuse-finder`: the proposal's path and the code paths it names.
 - `fap-fresh-reader`: the proposal's path, and nothing else.
@@ -88,8 +90,8 @@ for them, not a decision. Record their answers in the proposal, moving a settled
 from Open questions to Decisions, and offer the round again when their answers changed
 the approach.
 
-If one of the three agents is missing in this session, say so and run the round with the
-others; with none, say that the proposal was not challenged.
+If one of the three agents is missing in this session under either name, say so and run
+the round with the others; with none, say that the proposal was not challenged.
 
 ## Handing over
 

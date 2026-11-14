@@ -1,8 +1,60 @@
 # Installing Belay
 
-The [README](../README.md#install) has the one-line install. This page has the rest:
-where the clone goes, how an update finds it and when it stops, installing part of it,
-what `build.sh` writes into your home folders, and Codex.
+The [README](../README.md#install) has the plugin and the one-line install. This page
+has the rest: updating the plugin, switching to it from the scripts, and adding Codex
+next to it; then, for the scripts, where the clone goes, how an update finds it and when
+it stops, installing part of it, what `build.sh` writes into your home folders,
+uninstalling, and Codex.
+
+## The plugin
+
+The [README](../README.md#install) gives the two commands that install the plugin, the
+names its commands carry, and why to pick it or the scripts for Claude Code, not both.
+
+To update it, run `/plugin` in a session and update Belay there, or, in a shell, refresh
+the marketplace, then the plugin; either way, restart running sessions afterwards.
+`/plugin` also removes it.
+
+```bash
+claude plugin marketplace update belay
+claude plugin update belay@belay
+```
+
+The plugin has no version number, so every commit to the repository is an update.
+Claude Code keeps its own copy of the whole repository under `~/.claude/plugins/`,
+scripts included, and loads only its `skills/` and `agents/`. Don't run the scripts from
+that copy: `get.sh` ignores where it runs from and would add a script install next to the
+plugin, and `install.sh` and `build.sh` would link the skills into a folder the next
+plugin update replaces.
+
+### Switching to the plugin
+
+To move Claude Code from the scripts to the plugin, remove the script install from
+Claude Code in the clone, then install the plugin and restart running sessions:
+
+```bash
+cd ~/.belay                        # or wherever your clone is
+./build.sh --uninstall --claude    # removes Belay from Claude Code, keeps Codex
+```
+
+This removes the agent files and skill links `build.sh` put in `~/.claude` (see
+[Uninstalling](#uninstalling)) and saves Codex's install as the selection, so the
+one-line command keeps updating Codex alone. Keep the clone while Codex uses it. Without
+Codex, run `./build.sh --uninstall` instead, then delete the clone.
+
+### Codex next to the plugin
+
+With the plugin in Claude Code, install Codex alone from a clone. Don't use the one-line
+command for this: its picker opens with Claude Code ticked, and without a terminal it
+installs into both.
+
+```bash
+git clone https://github.com/felipearpa/belay.git ~/.belay
+~/.belay/build.sh --codex --skills flow   # writes nothing into ~/.claude
+```
+
+The choice is saved in `install.conf`, so from then on the one-line command updates
+Codex alone.
 
 ## The one-line install
 
@@ -115,8 +167,9 @@ content is gone, so copy it first or untick it. Before you run `build.sh`, know 
   the README's [Agents](../README.md#the-pieces) table, and the same six as
   `~/.codex/agents/*.toml`, each starting with a line that names the clone it was
   generated from, such as "Generated from ~/.belay by build.sh". A file there with the
-  same name is overwritten. A file in those folders that `build.sh` generated earlier is
-  deleted when its agent no longer exists here, the flow isn't chosen, or its CLI isn't.
+  same name is overwritten. A file in those folders that this clone's `build.sh` generated
+  earlier is deleted when its agent no longer exists here, the flow isn't chosen, or its
+  CLI isn't; one whose line names another clone is left alone.
 - **Links skills.** One symlink per chosen skill in `~/.claude/skills/` and
   `~/.codex/skills/`. An existing symlink with the same name is repointed at this clone;
   a real folder with the same name is left alone and reported. A symlink `build.sh`
@@ -132,14 +185,42 @@ writes nothing either; it lists every file the run would touch, as `install.sh` 
 To try the install without touching your real setup, point it at a temporary folder:
 `CLAUDE_HOME="$(mktemp -d)" CODEX_HOME="$(mktemp -d)" ./build.sh`.
 
+## Uninstalling
+
+The one-line command doesn't uninstall; `build.sh` does, run in the clone. Preview it,
+then run one of the last two:
+
+```bash
+cd ~/.belay                        # or wherever your clone is
+./build.sh --uninstall --dry-run   # lists what would be removed, and removes nothing
+./build.sh --uninstall             # removes Belay from Claude Code and Codex
+./build.sh --uninstall --claude    # removes it from Claude Code only, and keeps Codex
+```
+
+It removes only what this clone installed: the agent files whose "Generated from" line
+names this clone, and the skill links that point into it. A real file or folder with a
+skill's name, an agent's file `build.sh` didn't generate, and another clone's agent files
+and links stay, each named in a note; run `--uninstall` from that other clone to remove
+them. `install.conf` is never read: removing from both CLIs deletes it, and
+removing from one (`--claude` or `--codex`) saves what is installed in the other as the
+selection, so the next update reinstalls only that one, or deletes it when nothing is.
+
+The clone stays, and the last lines say where; delete it yourself when nothing uses it.
+After uninstalling from both, the one-line command finds nothing installed: on a
+terminal it opens the picker, and without one it stops and says so. With the skill links
+gone it finds a clone outside `~/.belay` only through `BELAY_HOME`, so run without it,
+it would clone Belay again into `~/.belay`, or update another clone when skill links into
+that one remain; the uninstall warns when either applies.
+
 ## Codex
 
-Codex is supported. `build.sh` writes each agent as `~/.codex/agents/<name>.toml` and
-links each chosen skill into `~/.codex/skills/`. The agents name no model, so each
-inherits the session's model and, in Codex, its reasoning effort. To install into Codex
-alone, run `./build.sh --codex --skills flow` (see
-[Installing part of it](#installing-part-of-it)). Run the skills the way Codex runs
-skills.
+Codex is supported through the scripts. `build.sh` writes each agent as
+`~/.codex/agents/<name>.toml` and links each chosen skill into `~/.codex/skills/`. The
+agents name no model, so each inherits the session's model and, in Codex, its reasoning
+effort. To install into Codex alone, run `./build.sh --codex --skills flow` (see
+[Installing part of it](#installing-part-of-it), and
+[Codex next to the plugin](#codex-next-to-the-plugin) when Claude Code has the plugin).
+Run the skills the way Codex runs skills.
 
 One step hasn't been tried in Codex yet: sending a fix round or an adjustment to the
 agent that already did the work, so it keeps its context. fap-build does this with the

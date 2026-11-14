@@ -8,8 +8,9 @@ checks below are the build.
 ## Checks
 
 Run them from the repository root. Check 1 is the quick one while editing; check 3
-covers it and runs before a commit. Never run any of them against your real `~/.claude`
-or `~/.codex`.
+covers it and runs before a commit, with check 4 when an agent source changed, check 5
+when `.claude-plugin/` did, and check 6 when a script did. Never run any of them against
+your real `~/.claude` or `~/.codex`.
 
 1. Install everything into a temporary home and confirm nothing is stale. `--all`
    ignores the selection saved in `install.conf`, so every skill and agent is checked.
@@ -62,6 +63,76 @@ or `~/.codex`.
    rm -rf "$tmp"
    ```
 
+4. Confirm the agents committed in `agents/` match what `agent-sources/` renders to. The
+   same command runs on GitHub for every pull request and every push to `main`
+   (`.github/workflows/agents.yml`). It writes nothing and touches no home folder.
+
+   ```bash
+   ./build.sh --render-agents --check   # exits 0, prints "up to date"
+   ```
+
+   It exits 1 and names each file that is stale, missing, left from a removed source
+   (`no agent source`), or not rendered there at all (`foreign:`); the convention below
+   fixes all but the last, which is moved out of `agents/` by hand.
+
+5. Validate the plugin manifests in `.claude-plugin/`. It needs the `claude` binary, so
+   it runs here and not on GitHub; the temporary configuration folder keeps `claude`
+   from writing into your real `~/.claude`.
+
+   ```bash
+   tmp="$(mktemp -d)"
+   CLAUDE_CONFIG_DIR="$tmp" claude plugin validate .   # exits 0, ends with "Validation passed with warnings"
+   rm -rf "$tmp"
+   ```
+
+   The one manifest warning accepted is that `plugin.json` has no `version`. Its plugin
+   directory warnings (no icon, `.DS_Store` files on disk that aren't committed) don't
+   change the result.
+
+6. Uninstall, then update, with no terminal and no network. It installs through `get.sh`
+   as check 3 does, removes everything with `build.sh --uninstall`, and runs the update,
+   which stops saying nothing is installed; then it reinstalls, removes Claude Code
+   alone, and runs the update again, which rebuilds Codex only. Run it four times: with
+   `belay_home` empty, so the clone is at `~/.belay`, and with `belay_home="$tmp/belay"`,
+   each with and without the two lines marked `# saves install.conf`. `in_tmp` gives
+   every script a temporary `HOME`, so nothing reaches your real home folder.
+
+   ```bash
+   tmp="$(mktemp -d)"
+   belay_home=""   # or belay_home="$tmp/belay" for a clone outside ~/.belay
+   clone="${belay_home:-$tmp/home/.belay}"
+   in_tmp() {
+     HOME="$tmp/home" CLAUDE_HOME="$tmp/home/.claude" CODEX_HOME="$tmp/home/.codex" \
+       BELAY_HOME="$belay_home" BELAY_REPO="$tmp/repo" "$@"
+   }
+   commit() {
+     echo "$1" >> "$tmp/repo/README.md"
+     git -C "$tmp/repo" -c user.name=check -c user.email=check@localhost commit -q --no-verify -am "$1"
+   }
+   mkdir "$tmp/home"
+   cp -R . "$tmp/repo"
+   git -C "$tmp/repo" add -A
+   git -C "$tmp/repo" -c user.name=check -c user.email=check@localhost commit -q --allow-empty --no-verify -m check
+   cat get.sh | in_tmp bash > "$tmp/get.log" 2>&1
+   in_tmp "$clone/build.sh" --claude --codex --skills flow > /dev/null   # saves install.conf
+   in_tmp "$clone/build.sh" --uninstall   # 18 "removed" lines; with $tmp/belay, a warning about a second clone
+   ls "$clone/install.conf"   # No such file or directory
+   commit "update 1"
+   cat get.sh | in_tmp bash > "$tmp/update.log" 2>&1; echo $?   # prints 1
+   tail -2 "$tmp/update.log"   # "... has no saved selection and nothing is installed from it, so nothing was installed."
+   in_tmp "$clone/build.sh" --all > /dev/null
+   in_tmp "$clone/build.sh" --claude --codex --skills flow > /dev/null   # saves install.conf
+   in_tmp "$clone/build.sh" --uninstall --claude | tail -3   # "Saved Codex's install as the selection in ... (--codex --skills flow)..."
+   rm "$tmp/home/.codex/agents/fap-reviewer.toml"
+   commit "update 2"
+   cat get.sh | in_tmp bash > "$tmp/update.log" 2>&1; echo $?   # prints 0
+   git -C "$clone" log -1 --format=%s   # prints "update 2"
+   grep '^wrote' "$tmp/update.log"   # only the Codex fap-reviewer.toml
+   find "$tmp/home/.claude" ! -type d   # prints nothing
+   in_tmp "$clone/build.sh" --check   # exits 0, ends with "up to date"
+   rm -rf "$tmp"
+   ```
+
 ## Files that change together
 
 - `README.md` and `docs/structure.md` describe the same system, so a change to one,
@@ -70,5 +141,12 @@ or `~/.codex`.
 ## Conventions
 
 - Edit the sources here, never the generated files under `~/.claude` or `~/.codex`.
+- `agents/` holds generated files that are committed, because the Claude Code plugin
+  loads them as they are in git. Never edit them: edit `agent-sources/`, run
+  `./build.sh --render-agents`, and commit what it changed in `agents/` with the sources.
+  Ordinary `build.sh` runs never write there.
 - Agents name no model; every agent inherits the session's model in both CLIs.
 - Graphics are Mermaid blocks only, so GitHub renders them without assets.
+- In the scripts, a comment says only what the code can't: a reason, an outside
+  constraint, a contract another script relies on. Name functions and variables so they
+  read without one, and drop a comment that restates the code.

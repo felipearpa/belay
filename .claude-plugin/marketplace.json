@@ -1,0 +1,14 @@
+{
+  "name": "belay",
+  "description": "Belay, an agent-based development system for Claude Code.",
+  "owner": {
+    "name": "felipearpa"
+  },
+  "plugins": [
+    {
+      "name": "belay",
+      "source": "./",
+      "description": "Build an idea as small, reviewed commits: think it through, plan it in slices, and build each slice with an implementer, a verifier, and a reviewer."
+    }
+  ]
+}

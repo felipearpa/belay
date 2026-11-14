@@ -1,0 +1,7 @@
+{
+  "name": "belay",
+  "description": "Build an idea as small, reviewed commits: think it through, plan it in slices, and build each slice with an implementer, a verifier, and a reviewer.",
+  "author": {
+    "name": "felipearpa"
+  }
+}

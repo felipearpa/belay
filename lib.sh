@@ -34,15 +34,64 @@ frontmatter_value() {
 
 shown_path() { if [[ "$1" == "$HOME/"* ]]; then echo "~/${1#"$HOME/"}"; else echo "$1"; fi; }
 
-# A link build.sh made: it points at the skill of the same name in the clone's skills folder.
-is_clone_link() { [[ -L "$1" && "$(readlink "$1")" == "$here/skills/$(basename "$1")" ]]; }
+# A folder reached through a symlink has more than one spelling; links and notices keep the
+# spelling they were written with, so they are compared by the folder they resolve to.
+same_folder() {
+  local first second
+  [[ "$1" == "$2" ]] && return 0
+  first="$(cd -P "$1" 2>/dev/null && pwd)" && second="$(cd -P "$2" 2>/dev/null && pwd)" \
+    && [[ -n "$first" && "$first" == "$second" ]]
+}
+
+links_into_clone() {
+  local target
+  [[ -L "$1" ]] || return 1
+  target="$(readlink "$1")"
+  [[ "$target" == /*/skills/* ]] && same_folder "${target%/skills/*}" "$here"
+}
+is_clone_link() { links_into_clone "$1" && [[ "$(readlink "$1")" == */skills/"$(basename "$1")" ]]; }
+
+notice_line() {
+  case "$1" in
+    *.md) awk 'NR == 1 && $0 != "---" { exit } NR == 2 { print; exit }' "$1" ;;
+    *) head -n 1 "$1" ;;
+  esac
+}
+# The clone as the notice names it, shortened by shown_path.
+notice_clone() {
+  local clone
+  clone="$(notice_line "$1")"
+  clone="${clone#"# Generated from "}"
+  echo "${clone%" $generated_mark"}"
+}
+is_generated() {
+  local clone
+  [[ "$(notice_line "$1")" == "# Generated from "*" $generated_mark" ]] || return 1
+  [[ -n "${2:-}" ]] || return 0
+  clone="$(notice_clone "$1")"
+  [[ "$clone" != "~/"* ]] || clone="$HOME/${clone#"~/"}"
+  same_folder "$clone" "$2"
+}
+
+has_generated_agent() {
+  local home="$1" extension="$2" only_from_clone="${3:-}" file
+  for file in "$home"/agents/*."$extension"; do
+    [[ -f "$file" ]] && is_generated "$file" "$only_from_clone" && return 0
+  done
+  return 1
+}
+has_skill_link() {
+  local home="$1" folder
+  for folder in $2; do
+    is_clone_link "$home/skills/$folder" && return 0
+  done
+  return 1
+}
 
 claude_home="${CLAUDE_HOME:-$HOME/.claude}"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
 
-# Sets targets and skills from the file, or selection_error to the shell's first complaint
-# and returns 1 when the file doesn't source cleanly. The final "." keeps an empty last
-# list from being lost to command substitution.
+# The final "." keeps an empty last list from being lost to command substitution.
 read_selection() {
   local file="$1" saved
   if ! saved="$(targets="" skills=""

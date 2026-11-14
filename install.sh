@@ -37,7 +37,7 @@ add_targets() {
 }
 
 add_skills() {
-  local agents=("$here"/agents/*/AGENT.md) skill description tick
+  local agents=("$here"/agent-sources/*/AGENT.md) skill description tick
   local flow_note="${flow_skills// /, } and the ${#agents[@]} agents"
   add_item skill flow "The flow" "$flow_note" 1
   for skill in $(optional_skill_names); do
@@ -61,20 +61,6 @@ tick_saved() {
   done
 }
 
-has_generated_agent() {
-  local file
-  for file in "$1"/agents/*."$2"; do
-    [[ -f "$file" ]] && grep -q "$generated_mark" "$file" && return 0
-  done
-  return 1
-}
-has_skill_link() {
-  local home="$1" folder
-  for folder in $2; do
-    is_clone_link "$home/skills/$folder" && return 0
-  done
-  return 1
-}
 skill_installed() {
   local folders
   folders="$(skill_folders_of "$1")"
