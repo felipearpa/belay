@@ -405,7 +405,7 @@ if in_list flow "$skills"; then
   for name in $names; do
     if targeted claude; then place "$tmp/$name.md" "$claude_home/agents/$name.md" "$(agent_overwrite_remark "$claude_home/agents/$name.md")"; fi
     if targeted codex; then place "$tmp/$name.toml" "$codex_home/agents/$name.toml" "$(agent_overwrite_remark "$codex_home/agents/$name.toml")"; fi
-    (( dry_run )) || echo "$name: $(wc -w < "$tmp/$name.md" | tr -d ' ') words"
+    (( dry_run || check )) || echo "$name: $(wc -w < "$tmp/$name.md" | tr -d ' ') words"
   done
 fi
 
