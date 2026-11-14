@@ -78,7 +78,28 @@ flowchart TD
 
 ## Install
 
-You need Claude Code or Codex, bash, git, and curl.
+In Claude Code, install Belay as a plugin:
+
+```text
+/plugin marketplace add felipearpa/belay
+/plugin install belay@belay
+```
+
+The plugin brings the three skills and the six agents, with no clone and nothing
+written by Belay's scripts into your home folder; `/plugin` updates and removes it.
+Its commands carry the plugin's name: the skills are `/belay:fap-explore`,
+`/belay:fap-slice`, and `/belay:fap-build`, and the agents are `belay:fap-implementer`
+and so on. A bare `/fap-explore` also runs the plugin's skill when no other command has
+that name.
+
+Pick one install for Claude Code, the plugin or the scripts below, not both. With both,
+every skill and agent is listed twice, bare and with `belay:`, and a skill may start
+either copy of an agent, so updating one install can leave the other's copy in use.
+[Switching to the plugin](docs/install.md#switching-to-the-plugin) removes the script
+install from Claude Code in one step.
+
+For Codex, or to install into Claude Code through the scripts, you need bash, git, and
+curl:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/felipearpa/belay/main/get.sh | bash
@@ -87,15 +108,19 @@ curl -fsSL https://raw.githubusercontent.com/felipearpa/belay/main/get.sh | bash
 This clones the repository into `~/.belay` and opens a one-screen picker where you
 tick the CLIs and the skills you want. Before it writes anything it lists
 every file it would add, overwrite, or remove. Run the same command again to update.
+With the plugin in Claude Code, install Codex alone with the command in
+[Codex next to the plugin](docs/install.md#codex-next-to-the-plugin) instead, since the
+picker opens with Claude Code ticked.
 
 The skills are linked, not copied, so keep the clone where it is. To manage
 the clone yourself, clone it anywhere and run `./install.sh` from it; `./build.sh --check`
 then exits 0 and prints "up to date" while the install matches your choice.
 
-Installing part of it, installing into Codex, what `build.sh` writes into your home
-folder, how an update finds the clone and when it stops, and the `CLAUDE_HOME`,
-`CODEX_HOME`, and `BELAY_HOME` variables are in [docs/install.md](docs/install.md).
-Read [what build.sh touches](docs/install.md#what-buildsh-touches) before you install.
+Updating the plugin, installing part of it, installing into Codex, what `build.sh`
+writes into your home folder, how an update finds the clone and when it stops, and the
+`CLAUDE_HOME`, `CODEX_HOME`, and `BELAY_HOME` variables are in
+[docs/install.md](docs/install.md). Read
+[what build.sh touches](docs/install.md#what-buildsh-touches) before you install.
 
 ## Your first idea
 
@@ -107,10 +132,11 @@ In a project, start with an idea:
 
 It ends in `.fap/<slug>/proposal.md`: what is proposed and why, for you to read before
 anything is built, challenged by the three fresh agents when you ask. Run `fap-slice`
-with the slug to write the plan, then `fap-build` with the same slug once per slice. The
-read-only agents can also be asked for directly ("use the fap-reviewer agent on the
-current diff"); the implementer runs only inside `fap-build`. In Codex, run the skills
-the way Codex runs skills.
+with the slug to write the plan, then `fap-build` with the same slug once per slice
+(`/belay:fap-slice` and `/belay:fap-build` under the plugin). The read-only agents can
+also be asked for directly ("use the fap-reviewer agent on the current diff"); the
+implementer runs only inside `fap-build`. In Codex, run the skills the way Codex runs
+skills.
 
 Everything a plan needs lives next to it, so a later session resumes where the last one
 stopped:
@@ -156,7 +182,10 @@ the commit itself.
 | `fap-reviewer` | Reads a slice's diff against its plan, or a whole plan's diff for simplification, reuse, and where it departs from the proposal, and groups what the code metrics flag as split, test first, or leave. Read-only. |
 
 Each agent is an `agent-sources/<name>/AGENT.md`; `agent-sources/common.md` holds the
-contract they all share, which `build.sh` inserts into each. Every agent runs on the session's model.
+contract they all share, which `build.sh` inserts into each. The plugin, described by
+the two manifests in `.claude-plugin/`, loads the skills from `skills/` and the finished
+agents from `agents/`, which `./build.sh --render-agents` writes and which are
+committed, never edited. Every agent runs on the session's model.
 
 ## Tests and metrics
 

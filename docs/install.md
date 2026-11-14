@@ -1,8 +1,68 @@
 # Installing Belay
 
-The [README](../README.md#install) has the one-line install. This page has the rest:
-where the clone goes, how an update finds it and when it stops, installing part of it,
-what `build.sh` writes into your home folders, uninstalling, and Codex.
+The [README](../README.md#install) has the plugin and the one-line install. This page
+has the rest: updating the plugin, switching to it from the scripts, and adding Codex
+next to it; then, for the scripts, where the clone goes, how an update finds it and when
+it stops, installing part of it, what `build.sh` writes into your home folders,
+uninstalling, and Codex.
+
+## The plugin
+
+In Claude Code, the plugin is the whole install:
+
+```text
+/plugin marketplace add felipearpa/belay
+/plugin install belay@belay
+```
+
+It always brings the three skills and the six agents. Its commands carry its name:
+`/belay:fap-explore`, `/belay:fap-slice`, `/belay:fap-build`, and the agents as
+`belay:fap-implementer` and so on; a bare `/fap-explore` also runs the plugin's skill
+when no other command has that name. Pick it or the scripts for Claude Code, not both:
+with both, every skill and agent is listed twice and a skill may start either copy of an
+agent.
+
+To update, refresh the marketplace, then the plugin, and restart running sessions:
+
+```bash
+claude plugin marketplace update belay
+claude plugin update belay@belay
+```
+
+The plugin has no version number, so every commit to the repository is an update.
+Claude Code keeps its own copy of the whole repository under `~/.claude/plugins/`,
+scripts included, and loads only its `skills/` and `agents/`. Don't run `get.sh`,
+`install.sh`, or `build.sh` from that copy: they would install the scripts' copy next to
+the plugin, linked into a folder the next plugin update replaces.
+
+### Switching to the plugin
+
+To move Claude Code from the scripts to the plugin, remove the script install from
+Claude Code in the clone, then install the plugin and restart running sessions:
+
+```bash
+cd ~/.belay                        # or wherever your clone is
+./build.sh --uninstall --claude    # removes Belay from Claude Code, keeps Codex
+```
+
+This removes the agent files and skill links `build.sh` put in `~/.claude` (see
+[Uninstalling](#uninstalling)) and saves Codex's install as the selection, so the
+one-line command keeps updating Codex alone. Keep the clone while Codex uses it. Without
+Codex, run `./build.sh --uninstall` instead, then delete the clone.
+
+### Codex next to the plugin
+
+With the plugin in Claude Code, install Codex alone from a clone. Don't use the one-line
+command for this: its picker opens with Claude Code ticked, and without a terminal it
+installs into both.
+
+```bash
+git clone https://github.com/felipearpa/belay.git ~/.belay
+~/.belay/build.sh --codex --skills flow   # writes nothing into ~/.claude
+```
+
+The choice is saved in `install.conf`, so from then on the one-line command updates
+Codex alone.
 
 ## The one-line install
 
@@ -160,12 +220,13 @@ it would clone Belay again into `~/.belay`; the uninstall warns when that applie
 
 ## Codex
 
-Codex is supported. `build.sh` writes each agent as `~/.codex/agents/<name>.toml` and
-links each chosen skill into `~/.codex/skills/`. The agents name no model, so each
-inherits the session's model and, in Codex, its reasoning effort. To install into Codex
-alone, run `./build.sh --codex --skills flow` (see
-[Installing part of it](#installing-part-of-it)). Run the skills the way Codex runs
-skills.
+Codex is supported through the scripts. `build.sh` writes each agent as
+`~/.codex/agents/<name>.toml` and links each chosen skill into `~/.codex/skills/`. The
+agents name no model, so each inherits the session's model and, in Codex, its reasoning
+effort. To install into Codex alone, run `./build.sh --codex --skills flow` (see
+[Installing part of it](#installing-part-of-it), and
+[Codex next to the plugin](#codex-next-to-the-plugin) when Claude Code has the plugin).
+Run the skills the way Codex runs skills.
 
 One step hasn't been tried in Codex yet: sending a fix round or an adjustment to the
 agent that already did the work, so it keeps its context. fap-build does this with the
