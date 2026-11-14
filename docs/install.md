@@ -167,8 +167,9 @@ content is gone, so copy it first or untick it. Before you run `build.sh`, know 
   the README's [Agents](../README.md#the-pieces) table, and the same six as
   `~/.codex/agents/*.toml`, each starting with a line that names the clone it was
   generated from, such as "Generated from ~/.belay by build.sh". A file there with the
-  same name is overwritten. A file in those folders that `build.sh` generated earlier is
-  deleted when its agent no longer exists here, the flow isn't chosen, or its CLI isn't.
+  same name is overwritten. A file in those folders that this clone's `build.sh` generated
+  earlier is deleted when its agent no longer exists here, the flow isn't chosen, or its
+  CLI isn't; one whose line names another clone is left alone.
 - **Links skills.** One symlink per chosen skill in `~/.claude/skills/` and
   `~/.codex/skills/`. An existing symlink with the same name is repointed at this clone;
   a real folder with the same name is left alone and reported. A symlink `build.sh`
@@ -196,11 +197,11 @@ cd ~/.belay                        # or wherever your clone is
 ./build.sh --uninstall --claude    # removes it from Claude Code only, and keeps Codex
 ```
 
-It removes only what `build.sh` installed: the agent files it generated, recognized by
-their "Generated from" line, and the skill links that point into this clone. A real file
-or folder with a skill's name, an agent's file it didn't generate, and a link into
-another clone stay, each named in a note; run `--uninstall` from that other clone to
-remove its links. `install.conf` is never read: removing from both CLIs deletes it, and
+It removes only what this clone installed: the agent files whose "Generated from" line
+names this clone, and the skill links that point into it. A real file or folder with a
+skill's name, an agent's file `build.sh` didn't generate, and another clone's agent files
+and links stay, each named in a note; run `--uninstall` from that other clone to remove
+them. `install.conf` is never read: removing from both CLIs deletes it, and
 removing from one (`--claude` or `--codex`) saves what is installed in the other as the
 selection, so the next update reinstalls only that one, or deletes it when nothing is.
 
