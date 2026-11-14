@@ -155,8 +155,8 @@ the commit itself.
 | `fap-verifier` | With a fresh context, reruns every check of a slice and returns pass or fail with evidence, and defects with a reproduction. Writes only the plan's `verification.md`. |
 | `fap-reviewer` | Reads a slice's diff against its plan, or a whole plan's diff for simplification, reuse, and where it departs from the proposal, and groups what the code metrics flag as split, test first, or leave. Read-only. |
 
-Each agent is an `agents/<name>/AGENT.md`; `agents/common.md` holds the contract they all
-share, which `build.sh` inserts into each. Every agent runs on the session's model.
+Each agent is an `agent-sources/<name>/AGENT.md`; `agent-sources/common.md` holds the
+contract they all share, which `build.sh` inserts into each. Every agent runs on the session's model.
 
 ## Tests and metrics
 

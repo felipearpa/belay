@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-# Generates the Claude Code and Codex registrations for every agent under agents/ (from
-# its AGENT.md and agents/common.md) and links the skills under skills/ into each CLI's
-# skills folder, for the selection the flags describe, else
+# Generates the Claude Code and Codex registrations for every agent under agent-sources/
+# (from its AGENT.md and agent-sources/common.md) and links the skills under skills/ into
+# each CLI's skills folder, for the selection the flags describe, else
 # the one saved in install.conf, else everything, and removes what it installed earlier
 # that the selection no longer holds. --dry-run lists what that run would do, file by
-# file, and writes nothing.
+# file, and writes nothing. --render-agents writes the finished Claude Code agents into
+# agents/, the files committed for the plugin, and nothing else.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 conf="$here/install.conf"
 . "$here/lib.sh"
-usage_line="Usage: ./build.sh [--check | --dry-run] [--all | [--claude] [--codex] [--skills flow,<skill>,...]]"
+usage_line="Usage: ./build.sh [--check | --dry-run] [--all | [--claude] [--codex] [--skills flow,<skill>,...]]
+       ./build.sh --render-agents"
 usage() {
   echo "build.sh: $1" >&2
   echo "$usage_line" >&2
@@ -35,13 +37,14 @@ known_in_order() {
 }
 
 set -f # so a name like '*' from the flags or install.conf isn't globbed
-check=0; dry_run=0; all=0; flagged=0
+check=0; dry_run=0; all=0; flagged=0; render_only=0
 targets=""; skills=""
 while (( $# )); do
   case "$1" in
     --check) check=1 ;;
     --dry-run) dry_run=1 ;;
     --all) all=1 ;;
+    --render-agents) render_only=1 ;;
     --claude) targets="$targets claude"; flagged=1 ;;
     --codex) targets="$targets codex"; flagged=1 ;;
     --skills)
@@ -55,6 +58,10 @@ done
 (( all && flagged )) && usage "--all can't be combined with a selection"
 (( check && flagged )) && usage "--check takes no selection"
 (( check && dry_run )) && usage "--check and --dry-run can't be combined"
+if (( render_only )); then
+  (( check || dry_run || all || flagged )) && usage "--render-agents takes no other option"
+  all=1 # renders every agent, and never reads or writes install.conf
+fi
 
 if (( flagged )); then
   origin="the flags"
@@ -81,7 +88,11 @@ fi
 skill_folders="$(skill_folders_of "$skills")"
 set +f
 
-notice="Generated from $(shown_path "$here") $generated_mark"
+if (( render_only )); then
+  notice="Generated from agent-sources/ $generated_mark"
+else
+  notice="Generated from $(shown_path "$here") $generated_mark"
+fi
 stale=0
 
 tmp="$(mktemp -d)"
@@ -104,7 +115,7 @@ quoted() {
 }
 
 prompt_body() {
-  strip_frontmatter "$1" | awk -v cf="$here/agents/common.md" '
+  strip_frontmatter "$1" | awk -v cf="$here/agent-sources/common.md" '
     $0 == "{{common}}" { while ((getline line < cf) > 0) print line; close(cf); next }
     { print }
   '
@@ -187,10 +198,13 @@ agent_overwrite_remark() {
   [[ -f "$1" ]] && ! grep -q "$generated_mark" "$1" && echo "(not from build.sh; no backup)"
 }
 
+# Validates every agent source and renders it into $tmp as <name>.md and <name>.toml,
+# listing the names in order in names. Writes nowhere else.
 names=()
-if in_list flow "$skills"; then
-  [[ -f "$here/agents/common.md" ]] || { echo "Missing agents/common.md" >&2; exit 1; }
-  for agent_md in "$here"/agents/*/AGENT.md; do
+render_agents() {
+  local agent_md dir name description tools body
+  [[ -f "$here/agent-sources/common.md" ]] || { echo "Missing agent-sources/common.md" >&2; exit 1; }
+  for agent_md in "$here"/agent-sources/*/AGENT.md; do
     dir="$(dirname "$agent_md")"
     name="$(frontmatter_value name "$agent_md")"
     description="$(frontmatter_value description "$agent_md")"
@@ -209,15 +223,30 @@ if in_list flow "$skills"; then
     fi
     render_claude > "$tmp/$name.md"
     render_codex > "$tmp/$name.toml"
+    names+=("$name")
+  done
+}
+
+# The finished agents committed in agents/, for the plugin; nothing in the homes changes.
+if (( render_only )); then
+  render_agents
+  for name in "${names[@]}"; do
+    place "$tmp/$name.md" "$here/agents/$name.md"
+  done
+  exit 0
+fi
+
+if in_list flow "$skills"; then
+  render_agents
+  for name in "${names[@]}"; do
     if targeted claude; then place "$tmp/$name.md" "$claude_home/agents/$name.md" "$(agent_overwrite_remark "$claude_home/agents/$name.md")"; fi
     if targeted codex; then place "$tmp/$name.toml" "$codex_home/agents/$name.toml" "$(agent_overwrite_remark "$codex_home/agents/$name.toml")"; fi
-    names+=("$name")
     (( dry_run )) || echo "$name: $(wc -w < "$tmp/$name.md" | tr -d ' ') words"
   done
 fi
 
 agent_sources=""
-for agent_md in "$here"/agents/*/AGENT.md; do
+for agent_md in "$here"/agent-sources/*/AGENT.md; do
   agent_sources+=" $(basename "$(dirname "$agent_md")")"
 done
 

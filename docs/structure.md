@@ -12,7 +12,7 @@ flowchart LR
     BUILD["build.sh<br/>generates, links; --check, --dry-run"]
     LIB["lib.sh<br/>what both scripts share"]
     CONF["install.conf<br/>saved selection, git-ignored"]
-    subgraph AG["agents/"]
+    subgraph AG["agent-sources/"]
       COMMON["common.md<br/>contract every agent shares"]
       IMPL["fap-implementer/AGENT.md<br/>writes one slice, builds in pieces"]
       VER["fap-verifier/AGENT.md<br/>reruns the checks, writes verification.md"]
@@ -74,13 +74,13 @@ flowchart LR
 | `build.sh` | Takes each `AGENT.md`, inserts `common.md` at the `{{common}}` line, and writes the generated files for Claude and Codex. Also links the skills into each CLI's skills folder. `--claude`, `--codex` and `--skills` choose a part and save it to `install.conf`; a later plain run reads that file, and `--all` installs everything without touching it. Each run removes what it installed earlier that is no longer chosen: skill links into the clone and its generated agent files; a real file or folder in the way is left and reported. With `--check` it only reports what is stale against the saved selection, or against everything with `--all`, and creates nothing. With `--dry-run` it lists each file the same run would touch as overwrite, remove, new or unchanged, in that order, then the notes the run would print and each home it leaves untouched, and writes nothing, `install.conf` included. An `install.conf` that doesn't read cleanly stops it before it writes anything. |
 | `lib.sh` | What `install.sh` and `build.sh` both need, sourced by each: the flow's skills and the skill folders a selection installs, the list of optional skills, frontmatter parsing, how a path is shown, reading `install.conf`, each CLI's home, and how `build.sh`'s agent files and skill links are recognized. Not installed. |
 | `install.conf` | The saved selection, two shell-sourceable lines: `targets` and `skills` (`flow` and optional skill names). Written by `build.sh` from its flags, git-ignored. Without it, `build.sh` installs everything. |
-| `agents/common.md` | What every agent follows: priorities (a brief never overrides the project's instruction files or your own rules), how it learns the project, how it returns questions, what it must not touch. |
-| `agents/fap-implementer/AGENT.md` | Builds one slice in pieces, building between pieces, and verifies what the brief names. |
-| `agents/fap-verifier/AGENT.md` | With a fresh context, reruns every check and device flow. The only agent that writes `verification.md`. |
-| `agents/fap-reviewer/AGENT.md` | Reviews a slice against its plan, or the whole diff at the end for simplification and for where it departs from the proposal. When the project has a code-metrics command, groups its flagged functions as split, test first (with the rule named), or leave. Never edits. |
-| `agents/fap-reuse-finder/AGENT.md` | Reads the proposal and the code it names and reports what already exists that solves part of it or resembles it, and whether to extend it. Read-only. |
-| `agents/fap-fresh-reader/AGENT.md` | Reads the proposal and nothing else, as the reader who wasn't in the conversation: paraphrases it, then reports what it can't follow, what is assumed, and the obvious alternative it doesn't weigh. Read-only. |
-| `agents/fap-impact-analyst/AGENT.md` | Reads the proposal and the code it names and reports what the change would affect that the proposal doesn't say (stored data, flows, contracts) and the assumptions nothing has run yet, for the tracers. Read-only. |
+| `agent-sources/common.md` | What every agent follows: priorities (a brief never overrides the project's instruction files or your own rules), how it learns the project, how it returns questions, what it must not touch. |
+| `agent-sources/fap-implementer/AGENT.md` | Builds one slice in pieces, building between pieces, and verifies what the brief names. |
+| `agent-sources/fap-verifier/AGENT.md` | With a fresh context, reruns every check and device flow. The only agent that writes `verification.md`. |
+| `agent-sources/fap-reviewer/AGENT.md` | Reviews a slice against its plan, or the whole diff at the end for simplification and for where it departs from the proposal. When the project has a code-metrics command, groups its flagged functions as split, test first (with the rule named), or leave. Never edits. |
+| `agent-sources/fap-reuse-finder/AGENT.md` | Reads the proposal and the code it names and reports what already exists that solves part of it or resembles it, and whether to extend it. Read-only. |
+| `agent-sources/fap-fresh-reader/AGENT.md` | Reads the proposal and nothing else, as the reader who wasn't in the conversation: paraphrases it, then reports what it can't follow, what is assumed, and the obvious alternative it doesn't weigh. Read-only. |
+| `agent-sources/fap-impact-analyst/AGENT.md` | Reads the proposal and the code it names and reports what the change would affect that the proposal doesn't say (stored data, flows, contracts) and the assumptions nothing has run yet, for the tracers. Read-only. |
 | `skills/fap-explore/SKILL.md` | The stance of thinking before building. Ends in `proposal.md`, which the three challenge agents read with a fresh context, the user reviews, and fap-slice plans from. |
 | `skills/fap-slice/SKILL.md` | The slicer. Plans from a proposal or completes a goal, cuts the work into slices with their tracer in `plan.md`, checks the cut against the slicing rules, and stops at your OK. Builds nothing. |
 | `skills/fap-build/SKILL.md` | The orchestrator. Runs implementer, verifier, and reviewer on the next pending slice, stops for your review, then commits and closes it. |
@@ -91,7 +91,7 @@ flowchart LR
 
 | Path | Origin |
 | --- | --- |
-| `~/.claude/agents/*.md` | Generated by `build.sh` from `agents/` when the flow is chosen, and removed when it isn't. Never edited. |
+| `~/.claude/agents/*.md` | Generated by `build.sh` from `agent-sources/` when the flow is chosen, and removed when it isn't. Never edited. |
 | `~/.claude/skills/*` | Symlinks to the chosen `skills/*`: the flow's three with `flow`, each other by name. A link named after a skill and pointing at it in the clone is removed when that skill isn't chosen, and any link into the clone's `skills/` is removed once its skill no longer exists. |
 | `~/.codex/agents/*.toml`, `~/.codex/skills/*` | The same for Codex. Continuing an agent that already did the work (fix rounds, adjustments) hasn't been tried in Codex; there the skills start a new agent of that role. |
 
@@ -147,5 +147,5 @@ both source; change what they share there, so the picker and the install stay in
 1. `README.md`
 2. `skills/fap-slice/references/slicing.md` and `skills/fap-build/references/templates.md`
 3. `skills/fap-explore/SKILL.md`, `skills/fap-slice/SKILL.md`, then `skills/fap-build/SKILL.md`
-4. `agents/common.md`
+4. `agent-sources/common.md`
 5. The six `AGENT.md` files

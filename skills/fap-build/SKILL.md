@@ -9,7 +9,8 @@ argument-hint: "[slug]"
 This session coordinates; the agents do the work. `fap-implementer` writes code,
 `fap-verifier` checks it, `fap-reviewer` reads it; this session commits it. The plan lives
 in the repository at `.fap/<slug>/plan.md`, written with `fap-slice`. Agents don't edit the
-plan files, and this session doesn't edit product code.
+plan files, and this session doesn't edit product code. Start each agent by the name this
+session's agent list shows: the bare name, or `belay:<name>` under the Claude Code plugin.
 
 Each run builds one slice, the next pending one, and stops at the user's review before
 closing it. The user runs this skill again for the next slice.
@@ -36,8 +37,9 @@ closing it. The user runs this skill again for the next slice.
                                                   11 plan review ─→ 12 finish
 ```
 
-If `fap-implementer` or `fap-verifier` is missing in this session, say so and stop. If
-`fap-reviewer` is missing, say so and run the loop without that step.
+If `fap-implementer` or `fap-verifier` is missing in this session under either name, say
+so and stop. If `fap-reviewer` is missing under either name, say so and run the loop
+without that step.
 
 Read `references/templates.md` before writing any plan file.
 

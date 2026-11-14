@@ -37,7 +37,7 @@ add_targets() {
 }
 
 add_skills() {
-  local agents=("$here"/agents/*/AGENT.md) skill description tick
+  local agents=("$here"/agent-sources/*/AGENT.md) skill description tick
   local flow_note="${flow_skills// /, } and the ${#agents[@]} agents"
   add_item skill flow "The flow" "$flow_note" 1
   for skill in $(optional_skill_names); do
