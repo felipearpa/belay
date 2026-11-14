@@ -269,8 +269,9 @@ After the last slice, start at the same time:
   plus the current working-tree changes, and tell the user about any file in one and
   not the other;
 - one `fap-verifier` agent with the paths of `plan.md` and `verification.md`, and the
-  instruction to check every Done when item live against the product, as
-  `templates.md` describes, and append the `Done when` section to `verification.md`.
+  instruction to check every Done when item live against the product and append to
+  `verification.md` a section headed `Done when (<date>)` with one line per item:
+  `proven` with the evidence, or `not proven` with what it observed instead.
 
 Show the user the reviewer's findings and any Done when item that is not proven, once.
 A not-proven item is a gap in the plan, not in the code: ask whether to accept it as
