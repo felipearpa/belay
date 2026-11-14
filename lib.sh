@@ -37,6 +37,22 @@ shown_path() { if [[ "$1" == "$HOME/"* ]]; then echo "~/${1#"$HOME/"}"; else ech
 # A link build.sh made: it points at the skill of the same name in the clone's skills folder.
 is_clone_link() { [[ -L "$1" && "$(readlink "$1")" == "$here/skills/$(basename "$1")" ]]; }
 
+# An agent generated from any clone counts; a skill link counts only into this clone.
+has_generated_agent() {
+  local file
+  for file in "$1"/agents/*."$2"; do
+    [[ -f "$file" ]] && grep -q "$generated_mark" "$file" && return 0
+  done
+  return 1
+}
+has_skill_link() {
+  local home="$1" folder
+  for folder in $2; do
+    is_clone_link "$home/skills/$folder" && return 0
+  done
+  return 1
+}
+
 claude_home="${CLAUDE_HOME:-$HOME/.claude}"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
 

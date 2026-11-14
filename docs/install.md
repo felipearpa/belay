@@ -2,7 +2,7 @@
 
 The [README](../README.md#install) has the one-line install. This page has the rest:
 where the clone goes, how an update finds it and when it stops, installing part of it,
-what `build.sh` writes into your home folders, and Codex.
+what `build.sh` writes into your home folders, uninstalling, and Codex.
 
 ## The one-line install
 
@@ -131,6 +131,32 @@ choice (from everything with `--all`) and exits 1 if anything does. `./build.sh 
 writes nothing either; it lists every file the run would touch, as `install.sh` shows it.
 To try the install without touching your real setup, point it at a temporary folder:
 `CLAUDE_HOME="$(mktemp -d)" CODEX_HOME="$(mktemp -d)" ./build.sh`.
+
+## Uninstalling
+
+The one-line command doesn't uninstall; `build.sh` does, run in the clone. Preview it,
+then run one of the last two:
+
+```bash
+cd ~/.belay                        # or wherever your clone is
+./build.sh --uninstall --dry-run   # lists what would be removed, and removes nothing
+./build.sh --uninstall             # removes Belay from Claude Code and Codex
+./build.sh --uninstall --claude    # removes it from Claude Code only, and keeps Codex
+```
+
+It removes only what `build.sh` installed: the agent files it generated, recognized by
+their "Generated from" line, and the skill links that point into this clone. A real file
+or folder with a skill's name, an agent's file it didn't generate, and a link into
+another clone stay, each named in a note; run `--uninstall` from that other clone to
+remove its links. `install.conf` is never read: removing from both CLIs deletes it, and
+removing from one (`--claude` or `--codex`) saves what is installed in the other as the
+selection, so the next update reinstalls only that one, or deletes it when nothing is.
+
+The clone stays, and the last lines say where; delete it yourself when nothing uses it.
+After uninstalling from both, the one-line command finds nothing installed: on a
+terminal it opens the picker, and without one it stops and says so. With the skill links
+gone it finds a clone outside `~/.belay` only through `BELAY_HOME`, so run without it,
+it would clone Belay again into `~/.belay`; the uninstall warns when that applies.
 
 ## Codex
 

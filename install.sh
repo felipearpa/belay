@@ -61,20 +61,6 @@ tick_saved() {
   done
 }
 
-has_generated_agent() {
-  local file
-  for file in "$1"/agents/*."$2"; do
-    [[ -f "$file" ]] && grep -q "$generated_mark" "$file" && return 0
-  done
-  return 1
-}
-has_skill_link() {
-  local home="$1" folder
-  for folder in $2; do
-    is_clone_link "$home/skills/$folder" && return 0
-  done
-  return 1
-}
 skill_installed() {
   local folders
   folders="$(skill_folders_of "$1")"
