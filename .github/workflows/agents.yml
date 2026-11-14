@@ -1,0 +1,22 @@
+# Fails when the agents committed in agents/ don't match what agent-sources/ renders to,
+# or when agents/ holds a file the render didn't write. Reads only; it never commits.
+# To fix a failure, run ./build.sh --render-agents and commit agents/ with the sources.
+name: Committed agents
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  fresh:
+    name: Committed agents are fresh
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - run: ./build.sh --render-agents --check

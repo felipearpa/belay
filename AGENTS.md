@@ -8,8 +8,9 @@ checks below are the build.
 ## Checks
 
 Run them from the repository root. Check 1 is the quick one while editing; check 3
-covers it and runs before a commit. Never run any of them against your real `~/.claude`
-or `~/.codex`.
+covers it and runs before a commit, with check 4 when an agent source changed and check
+5 when `.claude-plugin/` did. Never run any of them against your real `~/.claude` or
+`~/.codex`.
 
 1. Install everything into a temporary home and confirm nothing is stale. `--all`
    ignores the selection saved in `install.conf`, so every skill and agent is checked.
@@ -62,6 +63,32 @@ or `~/.codex`.
    rm -rf "$tmp"
    ```
 
+4. Confirm the agents committed in `agents/` match what `agent-sources/` renders to. The
+   same command runs on GitHub for every pull request and every push to `main`
+   (`.github/workflows/agents.yml`). It writes nothing and touches no home folder.
+
+   ```bash
+   ./build.sh --render-agents --check   # exits 0, prints "up to date"
+   ```
+
+   It exits 1 and names each file that is stale, missing, left from a removed source
+   (`no agent source`), or not rendered there at all (`foreign:`); the convention below
+   fixes all but the last, which is moved out of `agents/` by hand.
+
+5. Validate the plugin manifests in `.claude-plugin/`. It needs the `claude` binary, so
+   it runs here and not on GitHub; the temporary configuration folder keeps `claude`
+   from writing into your real `~/.claude`.
+
+   ```bash
+   tmp="$(mktemp -d)"
+   CLAUDE_CONFIG_DIR="$tmp" claude plugin validate .   # exits 0, ends with "Validation passed with warnings"
+   rm -rf "$tmp"
+   ```
+
+   The one manifest warning accepted is that `plugin.json` has no `version`. Its plugin
+   directory warnings (no icon, `.DS_Store` files on disk that aren't committed) don't
+   change the result.
+
 ## Files that change together
 
 - `README.md` and `docs/structure.md` describe the same system, so a change to one,
@@ -70,5 +97,9 @@ or `~/.codex`.
 ## Conventions
 
 - Edit the sources here, never the generated files under `~/.claude` or `~/.codex`.
+- `agents/` holds generated files that are committed, because the Claude Code plugin
+  loads them as they are in git. Never edit them: edit `agent-sources/`, run
+  `./build.sh --render-agents`, and commit what it changed in `agents/` with the sources.
+  Ordinary `build.sh` runs never write there.
 - Agents name no model; every agent inherits the session's model in both CLIs.
 - Graphics are Mermaid blocks only, so GitHub renders them without assets.

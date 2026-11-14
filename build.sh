@@ -5,14 +5,16 @@
 # the one saved in install.conf, else everything, and removes what it installed earlier
 # that the selection no longer holds. --dry-run lists what that run would do, file by
 # file, and writes nothing. --render-agents writes the finished Claude Code agents into
-# agents/, the files committed for the plugin, and nothing else.
+# agents/, the files committed for the plugin, removes those whose source is gone, and
+# writes nothing else; with --check it only reports what in agents/ is stale, missing,
+# orphaned, or not rendered there.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 conf="$here/install.conf"
 . "$here/lib.sh"
 usage_line="Usage: ./build.sh [--check | --dry-run] [--all | [--claude] [--codex] [--skills flow,<skill>,...]]
-       ./build.sh --render-agents"
+       ./build.sh --render-agents [--check]"
 usage() {
   echo "build.sh: $1" >&2
   echo "$usage_line" >&2
@@ -59,7 +61,7 @@ done
 (( check && flagged )) && usage "--check takes no selection"
 (( check && dry_run )) && usage "--check and --dry-run can't be combined"
 if (( render_only )); then
-  (( check || dry_run || all || flagged )) && usage "--render-agents takes no other option"
+  (( dry_run || all || flagged )) && usage "--render-agents takes no other option than --check"
   all=1 # renders every agent, and never reads or writes install.conf
 fi
 
@@ -227,24 +229,6 @@ render_agents() {
   done
 }
 
-# The finished agents committed in agents/, for the plugin; nothing in the homes changes.
-if (( render_only )); then
-  render_agents
-  for name in "${names[@]}"; do
-    place "$tmp/$name.md" "$here/agents/$name.md"
-  done
-  exit 0
-fi
-
-if in_list flow "$skills"; then
-  render_agents
-  for name in "${names[@]}"; do
-    if targeted claude; then place "$tmp/$name.md" "$claude_home/agents/$name.md" "$(agent_overwrite_remark "$claude_home/agents/$name.md")"; fi
-    if targeted codex; then place "$tmp/$name.toml" "$codex_home/agents/$name.toml" "$(agent_overwrite_remark "$codex_home/agents/$name.toml")"; fi
-    (( dry_run )) || echo "$name: $(wc -w < "$tmp/$name.md" | tr -d ' ') words"
-  done
-fi
-
 agent_sources=""
 for agent_md in "$here"/agent-sources/*/AGENT.md; do
   agent_sources+=" $(basename "$(dirname "$agent_md")")"
@@ -261,6 +245,41 @@ remove_unselected_agents() {
     else remove_from_home "$generated" "no agent source"; fi
   done
 }
+
+# The finished agents committed in agents/, for the plugin; nothing in the homes changes.
+# One file per source is written, a generated file whose source is gone is removed, and
+# anything else there (the plugin would load it as an agent) is reported and left alone,
+# or under --check fails it. Hidden files, such as .DS_Store, aren't looked at.
+if (( render_only )); then
+  render_agents
+  for name in "${names[@]}"; do
+    place "$tmp/$name.md" "$here/agents/$name.md"
+  done
+  remove_unselected_agents "$here/agents" md "${names[*]+${names[*]}}"
+  for entry in "$here"/agents/*; do
+    exists "$entry" || continue
+    if [[ -f "$entry" && "$entry" == *.md ]]; then
+      in_list "$(basename "$entry" .md)" "${names[*]+${names[*]}}" && continue
+      grep -q "$generated_mark" "$entry" && continue
+    fi
+    if (( check )); then echo "foreign: $entry (not rendered from agent-sources/)"; stale=1
+    else note "$entry is not rendered from agent-sources/ and the plugin would load it as an agent; left alone"; fi
+  done
+  if (( check )); then
+    (( stale == 0 )) && echo "up to date"
+    exit $stale
+  fi
+  exit 0
+fi
+
+if in_list flow "$skills"; then
+  render_agents
+  for name in "${names[@]}"; do
+    if targeted claude; then place "$tmp/$name.md" "$claude_home/agents/$name.md" "$(agent_overwrite_remark "$claude_home/agents/$name.md")"; fi
+    if targeted codex; then place "$tmp/$name.toml" "$codex_home/agents/$name.toml" "$(agent_overwrite_remark "$codex_home/agents/$name.toml")"; fi
+    (( dry_run )) || echo "$name: $(wc -w < "$tmp/$name.md" | tr -d ' ') words"
+  done
+fi
 
 remove_unselected_agents "$claude_home/agents" md "$(when_targeted claude "${names[*]+${names[*]}}")"
 remove_unselected_agents "$codex_home/agents" toml "$(when_targeted codex "${names[*]+${names[*]}}")"
