@@ -95,7 +95,7 @@ flowchart LR
 | `agent-sources/fap-impact-analyst/AGENT.md` | Reads the proposal and the code it names and reports what the change would affect that the proposal doesn't say (stored data, flows, contracts) and the assumptions nothing has run yet, for the tracers. Read-only. |
 | `skills/fap-explore/SKILL.md` | The stance of thinking before building. Ends in `proposal.md`, which the three challenge agents read with a fresh context, the user reviews, and fap-slice plans from. Reads Belay's two reference files without asking (`allowed-tools`). |
 | `skills/fap-slice/SKILL.md` | The slicer. Plans from a proposal or completes a goal, cuts the work into slices with their tracer in `plan.md`, checks the cut against the slicing rules, and stops at your OK. Builds nothing. Reads Belay's two reference files without asking (`allowed-tools`). |
-| `skills/fap-build/SKILL.md` | The orchestrator. Runs implementer, verifier, and reviewer on the next pending slice, stops for your review, then commits and closes it. Reads Belay's two reference files without asking (`allowed-tools`). |
+| `skills/fap-build/SKILL.md` | The orchestrator. Runs implementer, verifier, and reviewer on the next pending slice, stops for your review, then commits and closes it. At that close it suggests the instruction file for decisions that would hold outside the plan. Reads Belay's two reference files without asking (`allowed-tools`). |
 | `skills/fap-slice/references/slicing.md` | What a slice is, when the first one is a tracer, and which check each task carries. |
 | `skills/fap-build/references/templates.md` | The templates for `proposal.md`, `plan.md`, `log.md`, and `verification.md`. |
 

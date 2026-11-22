@@ -244,6 +244,9 @@ log instead.
   need goes into `plan.md` now, if it isn't there yet: a design change to Decisions and
   the slices it affects, anything else to Decisions or Environment. Say what was added.
   Nothing an agent will need may stay only in this conversation.
+- For each decision added to `plan.md` during this slice that isn't specific to this
+  plan, suggest adding it to the repository's instruction file, with the wording. Don't
+  edit that file.
 - Mark each advisory finding in the slice's log entry `open` or `resolved in <fix round
   or user-review round>`, checked against the slice's diff: a fix or adjustment round
   may have covered it without saying so.
