@@ -300,9 +300,9 @@ Show:
   (one `fap-implementer` run through the fix loop of step 7 and the commit of step 9, or a
   new plan with `fap-slice` when it is bigger than a slice) or drop it. None is carried
   anywhere else; the code is the only record.
-- The decisions added to `plan.md` during the build that aren't specific to this plan:
-  for each, offer to move it to the repository's instruction file, so later plans don't
-  have to carry it
+- The decisions added to `plan.md` after the last slice closed that aren't specific to
+  this plan: for each, suggest adding it to the repository's instruction file, with the
+  wording
 - That `.fap/<slug>/` can stay as the record of the work or be deleted
 
 ## Guardrails
