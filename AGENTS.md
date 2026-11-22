@@ -47,7 +47,7 @@ your real `~/.claude` or `~/.codex`.
 
    ```bash
    tmp="$(mktemp -d)"
-   cp -R . "$tmp/repo"
+   rsync -a --exclude=.git . "$tmp/repo" && git init -q "$tmp/repo"
    git -C "$tmp/repo" add -A
    git -C "$tmp/repo" -c user.name=check -c user.email=check@localhost commit -q --allow-empty --no-verify -m check
    cat get.sh | CLAUDE_HOME="$tmp/claude" CODEX_HOME="$tmp/codex" BELAY_HOME="$tmp/belay" BELAY_REPO="$tmp/repo" bash > "$tmp/get.log" 2>&1
@@ -110,7 +110,7 @@ your real `~/.claude` or `~/.codex`.
      git -C "$tmp/repo" -c user.name=check -c user.email=check@localhost commit -q --no-verify -am "$1"
    }
    mkdir "$tmp/home"
-   cp -R . "$tmp/repo"
+   rsync -a --exclude=.git . "$tmp/repo" && git init -q "$tmp/repo"
    git -C "$tmp/repo" add -A
    git -C "$tmp/repo" -c user.name=check -c user.email=check@localhost commit -q --allow-empty --no-verify -m check
    cat get.sh | in_tmp bash > "$tmp/get.log" 2>&1
