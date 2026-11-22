@@ -60,11 +60,16 @@ all its tasks are ticked. Refer to tasks by their plan number (`2.1`). Show the 
 or awaiting review. The slice to build is the first that isn't closed.
 
 A slice whose `State:` line in `log.md` isn't `closed` is one that was left open: resume
-where the state says instead of starting over. `implementing` resumes at step 5 when
-`.fap/<slug>/snapshots/s<N>.before` exists and no `.after` does, otherwise at step 6;
-`fixing round N` at step 5 of that round; `awaiting review` at step 8; `stopped: fix
-loop exhausted` asks the user whether to send one more round or leave the slice as it
-is. A `.before` snapshot whose slice has no log entry is also an open slice: write its
+where the state says instead of starting over.
+
+- `implementing` resumes at step 5 when `.fap/<slug>/snapshots/s<N>.before` exists and no
+  `.after` does, otherwise at step 6;
+- `fixing round N` at step 5 of that round;
+- `awaiting review` at step 8;
+- `stopped: fix loop exhausted` asks the user whether to send one more round or leave the
+  slice as it is.
+
+A `.before` snapshot whose slice has no log entry is also an open slice: write its
 entry with `State: implementing` and resume at step 5.
 
 ## 3. Prepare the slice
@@ -166,16 +171,20 @@ step 7.
 
 ## 7. Fix loop
 
-Set `State: fixing round <R>`. Send the verifier's defects and the reviewer's blocking
-findings to the same implementer as one brief, continuing its context; when the CLI
-can't address an agent that is already running, start a new one of that role and give
-it the slice's log entry and the path of its `.files` list. Repeat step 5.
-Then, at the same time, send the fix diff to the same verifier for the checks the fix
-affects and to the same reviewer for a re-review: for each earlier finding, resolved or
-not, and any new problem in the lines the fix changed. An unresolved defect, an
-unresolved blocking finding, or a new one starts another round. At most two rounds;
-after the second, stop the slice uncommitted, set `State: stopped: fix loop exhausted`,
-record it in the log, and ask the user. Record each round in the log. Then go to step 8.
+1. Set `State: fixing round <R>`.
+2. Send the verifier's defects and the reviewer's blocking findings to the same
+   implementer as one brief, continuing its context; when the CLI can't address an agent
+   that is already running, start a new one of that role and give it the slice's log
+   entry and the path of its `.files` list.
+3. Repeat step 5.
+4. Then, at the same time, send the fix diff to the same verifier for the checks the fix
+   affects and to the same reviewer for a re-review: for each earlier finding, resolved or
+   not, and any new problem in the lines the fix changed.
+
+An unresolved defect, an unresolved blocking finding, or a new one starts another round.
+At most two rounds; after the second, stop the slice uncommitted, set
+`State: stopped: fix loop exhausted`, record it in the log, and ask the user. Record each
+round in the log. Then go to step 8.
 
 ## 8. User review
 
@@ -194,18 +203,21 @@ then show the user:
 Then wait for the user's answer.
 
 - **Approved**: write "Approved" in the User review section and go to step 9.
-- **Adjustments**: record the request in the User review section. If the request states
-  something that should hold beyond this slice (a convention, a rule about tests,
-  naming, or comments, a choice of account or variant), also append it to `plan.md`
-  under Decisions before sending it on; a one-off edit to this slice's files stays in
-  the log only. Send the request to the slice's implementer, or to a new `fap-implementer`
-  with the slice's log entry and the path of its `.files` list when the earlier one is
-  gone. Then repeat step 5 and run the verifier on the checks the change affects, and
-  come back to this step. The reviewer doesn't run, since the user is reviewing the
-  result; when the user asks for the adjustment "with review", also run the reviewer's
-  re-review as in step 7 before coming back. There is no round limit; the user decides.
-  If a request changes the plan's scope or design, update `plan.md` first and say what
-  changed.
+- **Adjustments**: record the request in the User review section.
+  - If the request states something that should hold beyond this slice (a convention, a
+    rule about tests, naming, or comments, a choice of account or variant), also append
+    it to `plan.md` under Decisions before sending it on; a one-off edit to this slice's
+    files stays in the log only.
+  - Send the request to the slice's implementer, or to a new `fap-implementer` with the
+    slice's log entry and the path of its `.files` list when the earlier one is gone.
+  - Then repeat step 5 and run the verifier on the checks the change affects, and come
+    back to this step.
+  - The reviewer doesn't run, since the user is reviewing the result; when the user asks
+    for the adjustment "with review", also run the reviewer's re-review as in step 7
+    before coming back.
+  - There is no round limit; the user decides.
+  - If a request changes the plan's scope or design, update `plan.md` first and say what
+    changed.
 
 ## 9. Commit
 
@@ -263,11 +275,17 @@ the next one. If this was the last slice, go to step 11.
 
 After the last slice, start at the same time:
 
-- one `fap-reviewer` agent with the path of `plan.md`, the plan's goal, the union of every
-  slice's `.files` list, the advisory findings still marked `open` in the log, and, when
-  the instruction files name a code-metrics command, its output over that union (run it
-  once here, on the file list), for the plan review: simplification and reuse, and, when the plan's Goal points at a
+- one `fap-reviewer` agent with
+  - the path of `plan.md`,
+  - the plan's goal,
+  - the union of every slice's `.files` list,
+  - the advisory findings still marked `open` in the log,
+  - and, when the instruction files name a code-metrics command, its output over that
+    union (run it once here, on the file list),
+
+  for the plan review: simplification and reuse, and, when the plan's Goal points at a
   proposal, its path too, for the contrast with what was proposed.
+
   First check that union against `git diff --name-only <first slice's commit>^..HEAD`
   plus the current working-tree changes, and tell the user about any file in one and
   not the other;
@@ -308,11 +326,14 @@ Show:
 ## Guardrails
 
 - Don't write or fix product code in this session. Send fixes back to the implementer.
-  The commit in step 9 is the one git write this session makes.
-- Edit `plan.md` only to write Environment answers in step 3, to record decisions in
-  steps 4, 8, and 10, or when an answer changes the design, and say so each time.
-  Otherwise your only edits are ticking its boxes, writing `log.md`, and appending
-  acceptance lines to `verification.md`.
+- The commit in step 9 is the one git write this session makes.
+- Edit `plan.md` only
+  - to write Environment answers in step 3,
+  - to record decisions in steps 4, 8, and 10,
+  - or when an answer changes the design,
+
+  and say so each time. Otherwise your only edits are ticking its boxes, writing
+  `log.md`, and appending acceptance lines to `verification.md`.
 - One slice per run, never more.
 - Give agents paths, not pasted contents. They start with a fresh context, so a brief
   carries nothing that isn't in the plan or the slice's `.files` list: anything decided
