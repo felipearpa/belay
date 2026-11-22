@@ -72,6 +72,8 @@ flowchart TD
 - Your review shows what changed, how to see it yourself, the verifier's evidence, and
   the reviewer's findings. An adjustment reruns the verifier on what it affects, and the
   reviewer too when you ask for it.
+- As a slice closes, `fap-build` suggests adding to your instruction file any rule you
+  stated that would hold outside the plan.
 - After the last slice, a reviewer reads the whole plan's diff for simplification and
   reuse, and for where it departs from the proposal, and a verifier checks each Done
   when item against the product.
