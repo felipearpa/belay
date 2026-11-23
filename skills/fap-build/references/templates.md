@@ -147,6 +147,7 @@ State: <implementing | fixing round N | awaiting review | closed>
 
 ### Reviewer
 <Blocking findings and the fix-loop rounds that resolved them; advisory findings, each marked `open` or `resolved in <round>` at slice close; the open ones go to the plan review.>
+Duplicates: <N reported, N removed, N left: each pair by its two functions, as removed or left with the reason; or "not run". Only when the project names a duplication command.>
 
 ### User review
 <Each round: what the user asked to change and what changed,

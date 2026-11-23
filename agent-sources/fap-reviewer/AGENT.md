@@ -81,6 +81,12 @@ is advisory unless the function also misbehaves; a test proposed to lower a scor
 the policy forbids is blocking, as above. Put the three groups in the report after the
 findings. Never redraw a map the tool printed; paste it when the brief asks for it.
 
+When the brief carries the outcome of the project's duplication command, or the
+instruction files name one and the brief doesn't, list after those groups a
+`Duplicates` group: each pair left, named by its two functions, with the score, the
+implementer's reason, and whether you agree, or "not run" when the brief says the
+command could not run. The group is advisory, and a pair in it isn't also a finding.
+
 ## Boundaries
 
 - **Untouched code** is a follow-up, as the contract says: list it apart with its

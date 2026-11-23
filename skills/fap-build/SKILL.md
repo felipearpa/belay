@@ -150,8 +150,9 @@ both are read-only over the same file list.
   path of `verification.md`, and that it may write that file and captures under
   `verification/`.
 - The reviewer's brief gives the path of `plan.md`, the slice's tasks, the path of the
-  `.files` list, and the code-metrics output the implementer's report carries when
-  there is any.
+  `.files` list, the code-metrics output the implementer's report carries when there is
+  any, and, when the project names a duplication command, what that report says of it:
+  the pairs with a side in the `.files` list, "none", or that the command could not run.
 
 Wait for both and fill the Verifier and Reviewer sections of the log. Advisory findings
 go to the log without asking the user; the plan review in step 11 reconsiders them with
@@ -197,6 +198,8 @@ approve, or what to adjust?
 - **Metrics**, only when the project has a metrics command: the reviewer's
   code-metrics groups (split, test first, leave); when three or more functions are
   flagged and the command prints a map, paste the map as printed, never redrawn
+- **Duplicates**, only when the project has a duplication command: the reviewer's
+  Duplicates group, or "not run" when the command didn't run
 - **Files**: the count and the path of the slice's `.files` list
 
 Then wait for the user's answer.
@@ -261,6 +264,9 @@ log instead.
 - Mark each advisory finding in the slice's log entry `open` or `resolved in <fix round
   or user-review round>`, checked against the slice's diff: a fix or adjustment round
   may have covered it without saying so.
+- When the project has a duplication command, write the `Duplicates:` line in the
+  log entry's Reviewer section from the implementer's reports: the pairs reported,
+  removed, and left.
 - Finish the slice's entry in the log, set `State: closed`, recount the checkboxes in
   `plan.md`, and confirm the progress.
 - Delete the slice's `.before` and `.after*` snapshots once its commit is made. Keep

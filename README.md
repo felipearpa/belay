@@ -70,9 +70,10 @@ flowchart TD
 - The implementer reports what it changed, but `fap-build` takes the file list from
   snapshots of the working tree, so every brief and the commit read the same list.
 - Your review opens with the result, then shows what changed, how to see it yourself,
-  the reviewer's advisory findings, and the implementer's assumptions, and asks you to
-  approve or say what to adjust. An adjustment reruns the verifier on what it affects,
-  and the reviewer too when you ask for it.
+  the reviewer's advisory findings, the duplicate pairs the slice left, and the
+  implementer's assumptions, and asks you to approve or say what to adjust. An
+  adjustment reruns the verifier on what it affects, and the reviewer too when you ask
+  for it.
 - As a slice closes, `fap-build` suggests adding to your instruction file any rule you
   stated that would hold outside the plan.
 - After the last slice, a reviewer reads the whole plan's diff for simplification and
@@ -181,7 +182,7 @@ the commit itself.
 | `fap-impact-analyst` | Reads a proposal and the code it touches, and reports what the change would affect that the proposal doesn't say: stored data, existing flows, contracts, and the assumptions nothing has run yet, which become tracers. Read-only. |
 | `fap-implementer` | Implements one slice in small pieces, building after each, and runs every check its tasks name. Reports status per task, files changed, checks run, and open questions. |
 | `fap-verifier` | With a fresh context, reruns every check of a slice and returns pass or fail with evidence, and defects with a reproduction. Writes only the plan's `verification.md`. |
-| `fap-reviewer` | Reads a slice's diff against its plan, or a whole plan's diff for simplification, reuse, and where it departs from the proposal, and groups what the code metrics flag as split, test first, or leave. Read-only. |
+| `fap-reviewer` | Reads a slice's diff against its plan, or a whole plan's diff for simplification, reuse, and where it departs from the proposal, groups what the code metrics flag as split, test first, or leave, and lists the duplicate pairs the slice left. Read-only. |
 
 Each agent is an `agent-sources/<name>/AGENT.md`; `agent-sources/common.md` holds the
 contract they all share, which `build.sh` inserts into each. The plugin, described by
