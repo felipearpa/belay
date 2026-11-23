@@ -214,14 +214,19 @@ flowchart TD
 
 No test is ever added to lower a score.
 
+A project may also name a duplication command, such as
+[doppel](https://github.com/felipearpa/doppel), which finds pairs of functions with a
+similar structure; the implementer runs it after the metrics and removes each copy the
+slice made, or says why it left one.
+
 ## Make it yours
 
 The agents are project-neutral and tool-neutral, so they learn a project from its
 `AGENTS.md` or `CLAUDE.md`. Put there the build and test commands, the testing policy
 (which tests are allowed and which never are), an optional code-metrics command with how
-to read its output and what counts as flagged, the project's conventions, and links to
-its docs. This repository's own
-[AGENTS.md](AGENTS.md) is an example.
+to read its output and what counts as flagged, an optional duplication command in its two
+forms, per change and per file list, the project's conventions, and links to its docs.
+This repository's own [AGENTS.md](AGENTS.md) is an example.
 
 To add or change a skill or agent, see
 [Extending it](docs/structure.md#extending-it).

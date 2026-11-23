@@ -41,7 +41,7 @@ flowchart LR
   end
 
   subgraph REPO["Each repository"]
-    AGENTS["AGENTS.md<br/>build, test, code metrics, conventions"]
+    AGENTS["AGENTS.md<br/>build, test, code metrics, duplication, conventions"]
     FAP[".fap/slug/<br/>proposal.md · plan.md · design/ · log.md · verification.md · verification/ · snapshots/"]
   end
 
@@ -114,7 +114,7 @@ The three skills' `allowed-tools` header lets them read `slicing.md` and `templa
 
 | Path | Contents |
 | --- | --- |
-| `AGENTS.md` | Build and test commands, the testing policy (which tests are allowed, which never are, and what a function flagged by code metrics may get), an optional code-metrics command (crapper, or any tool whose output names each function with what it measured) with how to read that output and what counts as flagged, conventions, links to project docs. The agents receive it in their context; naming the tool and the policy only here is what keeps the agents project-neutral. |
+| `AGENTS.md` | Build and test commands, the testing policy (which tests are allowed, which never are, and what a function flagged by code metrics may get), an optional code-metrics command (crapper, or any tool whose output names each function with what it measured) with how to read that output and what counts as flagged, an optional duplication command (doppel) in its two forms, per change and per file list, conventions, links to project docs. The agents receive it in their context; naming the tool and the policy only here is what keeps the agents project-neutral. |
 | `.fap/<slug>/proposal.md` | What is proposed and why, written by fap-explore for a person to read before anything is built: problem (what exists today and for whom), outcome, approach, decisions with the options that lost, out of scope, risks (an assumption nothing has run yet marked `tracer candidate`), open questions, and a Status line (draft, challenged, approved). The challenge agents read it, fap-slice plans from it, and the plan review contrasts the code with it. |
 | `.fap/<slug>/plan.md` | The whole plan: goal (problem and outcome, or a pointer at the proposal with its outcome), done-when items, decisions, out of scope, paths to read first, environment (devices, accounts, backend); then one section per slice, in build order, with the header bullets a person reads (tracer, you will see) and one-line tasks with a `Check` sub-bullet. Decisions taken during the build are appended here, so briefs never depend on a conversation. |
 | `.fap/<slug>/design/*.png` | The agreed look for a plan that changes what the person sees: one render per screen or state, listed under Read first, named by the checks of the screen tasks. Saved by fap-explore when the look is approved there, or by fap-slice. |
