@@ -285,8 +285,10 @@ After the last slice, start at the same time:
   - the plan's goal,
   - the union of every slice's `.files` list,
   - the advisory findings still marked `open` in the log,
-  - and, when the instruction files name a code-metrics command, its output over that
+  - when the instruction files name a code-metrics command, its output over that
     union (run it once here, on the file list),
+  - and, when they name a duplication command, the output of its file-list form over
+    that union, run once here from the repository root,
 
   for the plan review: simplification and reuse, and, when the plan's Goal points at a
   proposal, its path too, for the contrast with what was proposed.
@@ -299,7 +301,8 @@ After the last slice, start at the same time:
   `verification.md` a section headed `Done when (<date>)` with one line per item:
   `proven` with the evidence, or `not proven` with what it observed instead.
 
-Show the user the reviewer's findings and any Done when item that is not proven, once.
+Show the user the reviewer's findings, the duplication command's output as it printed
+it, and any Done when item that is not proven, once.
 A not-proven item is a gap in the plan, not in the code: ask whether to accept it as
 is (append `Accepted without proof by the user.` to that line) or to add the missing
 task to the plan with `fap-slice` and build it as one more slice.
@@ -317,6 +320,8 @@ Show:
 - Each Done when item with proven, accepted, or not proven
 - The functions the plan left flagged by the code-metrics command, grouped as the plan
   reviewer judged them, and the map as printed when the command prints one
+- The duplicate pairs reported, removed, and left over the plan, summed from the
+  slices' `Duplicates:` lines in the log, when the project has a duplication command
 - Anything not verified and any open questions
 - The commits made
 - The follow-ups collected in the log, each with a decision from the user: fix it now

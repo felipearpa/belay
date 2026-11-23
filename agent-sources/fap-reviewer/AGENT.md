@@ -26,7 +26,10 @@ When the brief names a slice, judge the diff on:
 When the brief gives a whole plan's diff, look only for simplification and reuse across
 slices:
 
-- **Duplication** that now has three uses.
+- **Duplication** that now has three uses, and any pair in the duplication command's
+  output the brief carries that one function would serve, with a side the plan added
+  or changed: a finding, in place of the `Duplicates` group. A pair the plan didn't
+  touch is a follow-up.
 - **Abstractions** the slices justify, or no longer justify.
 - **Dead code** a later slice orphaned.
 - **Growth** past the project's complexity limit.
