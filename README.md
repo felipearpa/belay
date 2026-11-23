@@ -69,9 +69,10 @@ flowchart TD
 
 - The implementer reports what it changed, but `fap-build` takes the file list from
   snapshots of the working tree, so every brief and the commit read the same list.
-- Your review shows what changed, how to see it yourself, the verifier's evidence, and
-  the reviewer's findings. An adjustment reruns the verifier on what it affects, and the
-  reviewer too when you ask for it.
+- Your review opens with the result, then shows what changed, how to see it yourself,
+  the reviewer's advisory findings, and the implementer's assumptions, and asks you to
+  approve or say what to adjust. An adjustment reruns the verifier on what it affects,
+  and the reviewer too when you ask for it.
 - As a slice closes, `fap-build` suggests adding to your instruction file any rule you
   stated that would hold outside the plan.
 - After the last slice, a reviewer reads the whole plan's diff for simplification and

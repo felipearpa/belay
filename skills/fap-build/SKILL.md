@@ -189,16 +189,19 @@ round in the log. Then go to step 8.
 ## 8. User review
 
 Set `State: awaiting review` and add the User review section to the slice's log entry,
-then show the user:
+then show the user these bullets, each starting with its label, and end by asking:
+approve, or what to adjust?
 
-- What changed, as behavior, and the slice's file list
-- How to see it themselves: the command to build or run, or the flow to follow on a
-  device
-- The verifier's results with their evidence, checks that weren't run, and the
-  reviewer's findings and how they were resolved
-- The reviewer's code-metrics groups (split, test first, leave) when the project has a
-  metrics command; when three or more functions are flagged and the command prints a
-  map, paste the map as printed, never redrawn
+- **Result**: tasks passed out of the total; anything failed, unresolved, or in the
+  verifier's `Not verified` list; and that nothing is committed
+- **What changed**: as behavior
+- **See it**: the command or device flow, and what they should see
+- **Advisory**: the advisory findings, one line each; any can be asked as an adjustment
+- **Assumed**: the implementer's assumptions; they stand unless the user objects
+- **Metrics**, only when the project has a metrics command: the reviewer's
+  code-metrics groups (split, test first, leave); when three or more functions are
+  flagged and the command prints a map, paste the map as printed, never redrawn
+- **Files**: the count and the path of the slice's `.files` list
 
 Then wait for the user's answer.
 
