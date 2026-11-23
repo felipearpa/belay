@@ -132,7 +132,7 @@ flowchart LR
   I --> R["reconcile the file list<br/>into .files + log.md"]
   R --> V["verifier and reviewer<br/>in parallel"]
   V -- "defects or blocking findings:<br/>fix, re-verify, re-review (max 2 rounds)" --> I
-  V -- "still failing after 2 rounds" --> X["stop uncommitted,<br/>ask the user"]
+  V -- "still failing after 2 rounds" --> UR
   V -- "ok" --> UR["user review<br/>metrics groups, adjustments, no limit"]
   UR -- "approved" --> C["commit by the orchestrator"]
   C --> T["tick tasks, close the log"]

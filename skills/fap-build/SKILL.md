@@ -23,8 +23,7 @@ closing it. The user runs this skill again for the next slice.
    3 prepare ─→ 4 implement ─→ 5 reconcile ─→ 6 verify + review
                      ▲                                        │
                      │  7 fix loop: defects or blocking       │
-                     │    findings, ≤2 rounds; after the      │
-                     │    second: stop uncommitted, ask       │
+                     │    findings, ≤2 rounds, then 8         │
                      ├────────────────────────────────────────┤
                      │  adjustments, no limit                 │ ok
                      ├────────────────────────┐               ▼
@@ -65,9 +64,7 @@ where the state says instead of starting over.
 - `implementing` resumes at step 5 when `.fap/<slug>/snapshots/s<N>.before` exists and no
   `.after` does, otherwise at step 6;
 - `fixing round N` at step 5 of that round;
-- `awaiting review` at step 8;
-- `stopped: fix loop exhausted` asks the user whether to send one more round or leave the
-  slice as it is.
+- `awaiting review` at step 8.
 
 A `.before` snapshot whose slice has no log entry is also an open slice: write its
 entry with `State: implementing` and resume at step 5.
@@ -182,23 +179,25 @@ step 7.
    not, and any new problem in the lines the fix changed.
 
 An unresolved defect, an unresolved blocking finding, or a new one starts another round.
-At most two rounds; after the second, stop the slice uncommitted, set
-`State: stopped: fix loop exhausted`, record it in the log, and ask the user. Record each
-round in the log. Then go to step 8.
+At most two rounds. Record each round in the log, and after the second that the loop is
+exhausted. Then go to step 8.
 
 ## 8. User review
 
 Set `State: awaiting review` and add the User review section to the slice's log entry,
-then show the user:
+then show the user these bullets, each starting with its label, and end by asking:
+approve, or what to adjust?
 
-- What changed, as behavior, and the slice's file list
-- How to see it themselves: the command to build or run, or the flow to follow on a
-  device
-- The verifier's results with their evidence, checks that weren't run, and the
-  reviewer's findings and how they were resolved
-- The reviewer's code-metrics groups (split, test first, leave) when the project has a
-  metrics command; when three or more functions are flagged and the command prints a
-  map, paste the map as printed, never redrawn
+- **Result**: tasks passed out of the total; anything failed, unresolved, or in the
+  verifier's `Not verified` list; and that nothing is committed
+- **What changed**: as behavior
+- **See it**: the command or device flow, and what they should see
+- **Advisory**: the advisory findings, one line each; any can be asked as an adjustment
+- **Assumed**: the implementer's assumptions; they stand unless the user objects
+- **Metrics**, only when the project has a metrics command: the reviewer's
+  code-metrics groups (split, test first, leave); when three or more functions are
+  flagged and the command prints a map, paste the map as printed, never redrawn
+- **Files**: the count and the path of the slice's `.files` list
 
 Then wait for the user's answer.
 
