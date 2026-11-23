@@ -147,10 +147,38 @@ links and its agent files. `./build.sh --check` compares against the saved choic
 
 ## Optional tools
 
-The code-metrics tool a project's `AGENTS.md` names is installed apart from this
-repository, and `build.sh` installs none. Today that is `crapper`
-(https://github.com/felipearpa/crapper): clone it and put its launcher on the PATH
-through a short script that `exec`s it, since a symlink breaks its venv lookup.
+The tools a project's `AGENTS.md` names are installed apart from this repository, and
+`build.sh` installs none.
+
+- **Code metrics.** Today that is `crapper` (https://github.com/felipearpa/crapper):
+  clone it and put its launcher on the PATH through a short script that `exec`s it,
+  since a symlink breaks its venv lookup.
+- **Duplication.** Today that is `doppel` (https://github.com/felipearpa/doppel), for
+  Kotlin and Swift. Install it as a uv tool, which puts `doppel` in `~/.local/bin` and
+  fetches the Python it needs; `doppel --help` then lists the languages it reads.
+
+  ```bash
+  uv tool install git+https://github.com/felipearpa/doppel
+  ```
+
+  The first run in each language downloads that language's parser, so it needs
+  network; later runs use the cached parser and work offline.
+
+Run doppel from the repository root, naming the source folders below it, such as
+`doppel Android iOS`: it prints paths relative to where it runs, so they match the
+files a slice changed. A project names it in two forms, one per change and one per file
+list:
+
+```bash
+doppel --changed-functions Android iOS   # pairs with a function the uncommitted change touched
+doppel --focus <files>                   # pairs with a function in the named files
+```
+
+`--focus` takes the files to report on and scans the whole folder it runs from.
+
+Both tools write a folder where they run: doppel writes `.doppel/` at the root, and
+crapper `.metrics/` in each folder it runs from. Add those folders to the project's
+`.gitignore` before the first run, so they never show as changes.
 
 ## What build.sh touches
 
