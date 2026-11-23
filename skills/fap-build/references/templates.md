@@ -137,7 +137,7 @@ session can resume from the file.
 
 ```markdown
 ## Slice 1: <title> — <date>
-State: <implementing | fixing round N | awaiting review | stopped: fix loop exhausted | closed>
+State: <implementing | fixing round N | awaiting review | closed>
 
 ### Implementer
 <Status per task in one line each; file count and a summary, with the path of the slice's `.files` list; assumptions.>

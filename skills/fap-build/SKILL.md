@@ -23,8 +23,7 @@ closing it. The user runs this skill again for the next slice.
    3 prepare ─→ 4 implement ─→ 5 reconcile ─→ 6 verify + review
                      ▲                                        │
                      │  7 fix loop: defects or blocking       │
-                     │    findings, ≤2 rounds; after the      │
-                     │    second: stop uncommitted, ask       │
+                     │    findings, ≤2 rounds, then 8         │
                      ├────────────────────────────────────────┤
                      │  adjustments, no limit                 │ ok
                      ├────────────────────────┐               ▼
@@ -65,9 +64,7 @@ where the state says instead of starting over.
 - `implementing` resumes at step 5 when `.fap/<slug>/snapshots/s<N>.before` exists and no
   `.after` does, otherwise at step 6;
 - `fixing round N` at step 5 of that round;
-- `awaiting review` at step 8;
-- `stopped: fix loop exhausted` asks the user whether to send one more round or leave the
-  slice as it is.
+- `awaiting review` at step 8.
 
 A `.before` snapshot whose slice has no log entry is also an open slice: write its
 entry with `State: implementing` and resume at step 5.
@@ -182,9 +179,8 @@ step 7.
    not, and any new problem in the lines the fix changed.
 
 An unresolved defect, an unresolved blocking finding, or a new one starts another round.
-At most two rounds; after the second, stop the slice uncommitted, set
-`State: stopped: fix loop exhausted`, record it in the log, and ask the user. Record each
-round in the log. Then go to step 8.
+At most two rounds. Record each round in the log, and after the second that the loop is
+exhausted. Then go to step 8.
 
 ## 8. User review
 

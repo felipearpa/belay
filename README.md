@@ -59,7 +59,7 @@ flowchart TD
   I --> L["fap-build lists<br/>the files that changed"]
   L --> VR["verifier and reviewer<br/>in parallel, each with a fresh context"]
   VR -- "defects or blocking findings:<br/>fix round, at most 2" --> I
-  VR -- "still failing after round 2" --> X["stop uncommitted<br/>and ask you"]
+  VR -- "still failing after round 2" --> U
   VR -- "every check passes,<br/>no blocking finding" --> U["your review"]
   U -- "adjustments, no limit" --> I
   U -- "approved" --> C["fap-build commits the slice"]
