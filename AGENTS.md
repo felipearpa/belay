@@ -146,6 +146,9 @@ your real `~/.claude` or `~/.codex`.
   `./build.sh --render-agents`, and commit what it changed in `agents/` with the sources.
   Ordinary `build.sh` runs never write there.
 - Agents name no model; every agent inherits the session's model in both CLIs.
+- Agents and skills name no tool: they say "the code-metrics command" or "the duplication
+  command", and a tool's name appears only in `README.md`, `docs/install.md`, and
+  `docs/structure.md`.
 - Graphics are Mermaid blocks only, so GitHub renders them without assets.
 - In the scripts, a comment says only what the code can't: a reason, an outside
   constraint, a contract another script relies on. Name functions and variables so they

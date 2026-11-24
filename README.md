@@ -70,9 +70,10 @@ flowchart TD
 - The implementer reports what it changed, but `fap-build` takes the file list from
   snapshots of the working tree, so every brief and the commit read the same list.
 - Your review opens with the result, then shows what changed, how to see it yourself,
-  the reviewer's advisory findings, and the implementer's assumptions, and asks you to
-  approve or say what to adjust. An adjustment reruns the verifier on what it affects,
-  and the reviewer too when you ask for it.
+  the reviewer's advisory findings, the duplicate pairs the slice left, and the
+  implementer's assumptions, and asks you to approve or say what to adjust. An
+  adjustment reruns the verifier on what it affects, and the reviewer too when you ask
+  for it.
 - As a slice closes, `fap-build` suggests adding to your instruction file any rule you
   stated that would hold outside the plan.
 - After the last slice, a reviewer reads the whole plan's diff for simplification and
@@ -214,14 +215,19 @@ flowchart TD
 
 No test is ever added to lower a score.
 
+A project may also name a duplication command, such as
+[doppel](https://github.com/felipearpa/doppel), which finds pairs of functions with a
+similar structure; the implementer runs it after its checks and removes each copy the
+slice made, or says why it left one.
+
 ## Make it yours
 
 The agents are project-neutral and tool-neutral, so they learn a project from its
 `AGENTS.md` or `CLAUDE.md`. Put there the build and test commands, the testing policy
 (which tests are allowed and which never are), an optional code-metrics command with how
-to read its output and what counts as flagged, the project's conventions, and links to
-its docs. This repository's own
-[AGENTS.md](AGENTS.md) is an example.
+to read its output and what counts as flagged, an optional duplication command, the
+project's conventions, and links to its docs.
+This repository's own [AGENTS.md](AGENTS.md) is an example.
 
 To add or change a skill or agent, see
 [Extending it](docs/structure.md#extending-it).
@@ -230,6 +236,8 @@ To add or change a skill or agent, see
 
 [crapper](https://github.com/felipearpa/crapper) is a fork of
 [unclebob/crapper](https://github.com/unclebob/crapper) by Robert C. Martin.
+[doppel](https://github.com/felipearpa/doppel) starts from
+[dryer](https://github.com/unclebob/dryer) by Robert C. Martin.
 
 ## License
 

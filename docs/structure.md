@@ -41,7 +41,7 @@ flowchart LR
   end
 
   subgraph REPO["Each repository"]
-    AGENTS["AGENTS.md<br/>build, test, code metrics, conventions"]
+    AGENTS["AGENTS.md<br/>build, test, code metrics, duplication, conventions"]
     FAP[".fap/slug/<br/>proposal.md · plan.md · design/ · log.md · verification.md · verification/ · snapshots/"]
   end
 
@@ -76,7 +76,7 @@ flowchart LR
 | File | What it does |
 | --- | --- |
 | `README.md` | What the system is and why it works this way, what a slice and a tracer are, one slice end to end, the plugin and the one-line install and picking one for Claude Code, the pieces, tests and metrics, and how to make it yours. |
-| `docs/install.md` | The install in full: the plugin (its `belay:` prefix, updating it, switching to it from the scripts, Codex next to it), then for the scripts where the clone goes, how an update finds it and when it stops, installing part of it, what `build.sh` writes into your home folders, uninstalling, the optional code-metrics tool, and Codex. |
+| `docs/install.md` | The install in full: the plugin (its `belay:` prefix, updating it, switching to it from the scripts, Codex next to it), then for the scripts where the clone goes, how an update finds it and when it stops, installing part of it, what `build.sh` writes into your home folders, uninstalling, the optional code-metrics and duplication tools, and Codex. |
 | `.claude-plugin/marketplace.json` | Makes the repository a marketplace named `belay` that offers one plugin, `belay`, whose source is the repository root (`./`). Written by hand; lists no skills or agents. |
 | `.claude-plugin/plugin.json` | The plugin's name and description, with no `version`, so every commit is an update. Claude Code finds the skills and agents in the default `skills/` and `agents/` folders. |
 | `get.sh` | The one-line install and update, fetched with curl and piped to bash. It takes the clone from `BELAY_HOME`, else from the `fap-*` skill links in `~/.claude/skills` and `~/.codex/skills`, else `~/.belay`, and says which. When that folder doesn't exist, it clones the repository (`BELAY_REPO`, else the GitHub URL) there, then runs the clone's `install.sh` with keys read from `/dev/tty` when there is a terminal, and `build.sh --all` when there isn't. When it exists, it fetches, fast-forwards the current branch from its upstream, then shows `build.sh --dry-run` for the selection in `install.conf`, waits for enter, and runs `build.sh`; without a terminal it runs `build.sh` without waiting. With no `install.conf` it opens `install.sh` on a terminal, and without one runs `build.sh --all` only when skill links already point into the clone. It stops before installing anything, with the clone's files, its HEAD and the homes unchanged (a fetch may have moved its remote-tracking refs), on uncommitted changes to tracked files, commits the upstream lacks, a diverged branch, a detached HEAD or a branch with no upstream, skill links into more than one clone, a folder that isn't a git clone, or a broken link where the clone should be. Not installed. |
@@ -114,7 +114,7 @@ The three skills' `allowed-tools` header lets them read `slicing.md` and `templa
 
 | Path | Contents |
 | --- | --- |
-| `AGENTS.md` | Build and test commands, the testing policy (which tests are allowed, which never are, and what a function flagged by code metrics may get), an optional code-metrics command (crapper, or any tool whose output names each function with what it measured) with how to read that output and what counts as flagged, conventions, links to project docs. The agents receive it in their context; naming the tool and the policy only here is what keeps the agents project-neutral. |
+| `AGENTS.md` | Build and test commands, the testing policy (which tests are allowed, which never are, and what a function flagged by code metrics may get), an optional code-metrics command (crapper, or any tool whose output names each function with what it measured) with how to read that output and what counts as flagged, an optional duplication command (doppel), conventions, links to project docs. The agents receive it in their context; naming the tool and the policy only here is what keeps the agents project-neutral. |
 | `.fap/<slug>/proposal.md` | What is proposed and why, written by fap-explore for a person to read before anything is built: problem (what exists today and for whom), outcome, approach, decisions with the options that lost, out of scope, risks (an assumption nothing has run yet marked `tracer candidate`), open questions, and a Status line (draft, challenged, approved). The challenge agents read it, fap-slice plans from it, and the plan review contrasts the code with it. |
 | `.fap/<slug>/plan.md` | The whole plan: goal (problem and outcome, or a pointer at the proposal with its outcome), done-when items, decisions, out of scope, paths to read first, environment (devices, accounts, backend); then one section per slice, in build order, with the header bullets a person reads (tracer, you will see) and one-line tasks with a `Check` sub-bullet. Decisions taken during the build are appended here, so briefs never depend on a conversation. |
 | `.fap/<slug>/design/*.png` | The agreed look for a plan that changes what the person sees: one render per screen or state, listed under Read first, named by the checks of the screen tasks. Saved by fap-explore when the look is approved there, or by fap-slice. |
@@ -133,7 +133,7 @@ flowchart LR
   R --> V["verifier and reviewer<br/>in parallel"]
   V -- "defects or blocking findings:<br/>fix, re-verify, re-review (max 2 rounds)" --> I
   V -- "still failing after 2 rounds" --> UR
-  V -- "ok" --> UR["user review<br/>metrics groups, adjustments, no limit"]
+  V -- "ok" --> UR["user review<br/>metrics groups, duplicate pairs left,<br/>adjustments, no limit"]
   UR -- "approved" --> C["commit by the orchestrator"]
   C --> T["tick tasks, close the log"]
   T -- "next slice: run again" --> S

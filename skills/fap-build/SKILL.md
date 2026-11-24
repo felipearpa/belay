@@ -197,6 +197,9 @@ approve, or what to adjust?
 - **Metrics**, only when the project has a metrics command: the reviewer's
   code-metrics groups (split, test first, leave); when three or more functions are
   flagged and the command prints a map, paste the map as printed, never redrawn
+- **Duplicates**, only when the project has a duplication command: the pairs the
+  implementer left, each with its reason, from its last report, or "not run" when the
+  command didn't run
 - **Files**: the count and the path of the slice's `.files` list
 
 Then wait for the user's answer.
