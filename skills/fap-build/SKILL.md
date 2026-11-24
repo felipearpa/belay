@@ -152,7 +152,8 @@ both are read-only over the same file list.
 - The reviewer's brief gives the path of `plan.md`, the slice's tasks, the path of the
   `.files` list, the code-metrics output the implementer's report carries when there is
   any, and, when the project names a duplication command, what that report says of it:
-  the pairs with a side in the `.files` list, "none", or that the command could not run.
+  each pair it left with a side in the `.files` list, with its reason, "none", or that
+  the command could not run.
 
 Wait for both and fill the Verifier and Reviewer sections of the log. Advisory findings
 go to the log without asking the user; the plan review in step 11 reconsiders them with
@@ -199,7 +200,8 @@ approve, or what to adjust?
   code-metrics groups (split, test first, leave); when three or more functions are
   flagged and the command prints a map, paste the map as printed, never redrawn
 - **Duplicates**, only when the project has a duplication command: the reviewer's
-  Duplicates group, or "not run" when the command didn't run
+  Duplicates group as it wrote it, not a count, or "not run" when the command didn't
+  run
 - **Files**: the count and the path of the slice's `.files` list
 
 Then wait for the user's answer.
@@ -264,9 +266,6 @@ log instead.
 - Mark each advisory finding in the slice's log entry `open` or `resolved in <fix round
   or user-review round>`, checked against the slice's diff: a fix or adjustment round
   may have covered it without saying so.
-- When the project has a duplication command, write the `Duplicates:` line in the
-  log entry's Reviewer section from the implementer's reports: the pairs reported,
-  removed, and left.
 - Finish the slice's entry in the log, set `State: closed`, recount the checkboxes in
   `plan.md`, and confirm the progress.
 - Delete the slice's `.before` and `.after*` snapshots once its commit is made. Keep
@@ -278,17 +277,19 @@ the next one. If this was the last slice, go to step 11.
 
 ## 11. Plan review
 
-After the last slice, start at the same time:
+After the last slice, when the instruction files name a duplication command, run its
+file-list form once from the repository root over the union of every slice's `.files`
+list, and show the user its output as printed, right away, never in an agent's brief.
+Without a duplication command, say nothing about duplicates. Then start at the same
+time:
 
 - one `fap-reviewer` agent with
   - the path of `plan.md`,
   - the plan's goal,
   - the union of every slice's `.files` list,
   - the advisory findings still marked `open` in the log,
-  - when the instruction files name a code-metrics command, its output over that
+  - and, when the instruction files name a code-metrics command, its output over that
     union (run it once here, on the file list),
-  - and, when they name a duplication command, the output of its file-list form over
-    that union, run once here from the repository root,
 
   for the plan review: simplification and reuse, and, when the plan's Goal points at a
   proposal, its path too, for the contrast with what was proposed.
@@ -301,8 +302,7 @@ After the last slice, start at the same time:
   `verification.md` a section headed `Done when (<date>)` with one line per item:
   `proven` with the evidence, or `not proven` with what it observed instead.
 
-Show the user the reviewer's findings, the duplication command's output as it printed
-it, and any Done when item that is not proven, once.
+Show the user the reviewer's findings and any Done when item that is not proven, once.
 A not-proven item is a gap in the plan, not in the code: ask whether to accept it as
 is (append `Accepted without proof by the user.` to that line) or to add the missing
 task to the plan with `fap-slice` and build it as one more slice.
@@ -320,8 +320,6 @@ Show:
 - Each Done when item with proven, accepted, or not proven
 - The functions the plan left flagged by the code-metrics command, grouped as the plan
   reviewer judged them, and the map as printed when the command prints one
-- The duplicate pairs reported, removed, and left over the plan, summed from the
-  slices' `Duplicates:` lines in the log, when the project has a duplication command
 - Anything not verified and any open questions
 - The commits made
 - The follow-ups collected in the log, each with a decision from the user: fix it now

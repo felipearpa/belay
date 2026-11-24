@@ -79,7 +79,7 @@ flowchart TD
 - After the last slice, a reviewer reads the whole plan's diff for simplification and
   reuse, and for where it departs from the proposal, and a verifier checks each Done
   when item against the product. With a duplication command, you also see its report
-  over every file the plan touched, and the total of pairs reported, removed, and left.
+  over every file the plan touched.
 
 ## Install
 
@@ -218,10 +218,9 @@ No test is ever added to lower a score.
 
 A project may also name a duplication command, such as
 [doppel](https://github.com/felipearpa/doppel), which finds pairs of functions with a
-similar structure; the implementer runs it after the metrics and removes each copy the
-slice made, or says why it left one. Before the plan closes, it runs once more over
-every file the plan touched, and the plan reviewer may raise any pair it prints that
-has a function the plan added or changed.
+similar structure; the implementer runs its per-change form after its checks and
+removes each copy the slice made, or says why it left one. Before the plan closes, it
+runs once more over every file the plan touched, and you see its report.
 
 ## Make it yours
 

@@ -89,7 +89,7 @@ flowchart LR
 | `agent-sources/common.md` | What every agent follows: priorities (a brief never overrides the project's instruction files or your own rules), how it learns the project, how it returns questions, what it must not touch. |
 | `agent-sources/fap-implementer/AGENT.md` | Builds one slice in pieces, building between pieces, and verifies what the brief names. |
 | `agent-sources/fap-verifier/AGENT.md` | With a fresh context, reruns every check and device flow. The only agent that writes `verification.md`. |
-| `agent-sources/fap-reviewer/AGENT.md` | Reviews a slice against its plan, or the whole diff at the end for simplification and for where it departs from the proposal. When the project has a code-metrics command, groups its flagged functions as split, test first (with the rule named), or leave; when it has a duplication command, lists the pairs the slice left, with why, and in the plan review may raise any pair that command prints over the plan's files with a function the plan added or changed. Never edits. |
+| `agent-sources/fap-reviewer/AGENT.md` | Reviews a slice against its plan, or the whole diff at the end for simplification and for where it departs from the proposal. When the project has a code-metrics command, groups its flagged functions as split, test first (with the rule named), or leave; when it has a duplication command, lists the pairs the slice left, with why. Never edits. |
 | `agent-sources/fap-reuse-finder/AGENT.md` | Reads the proposal and the code it names and reports what already exists that solves part of it or resembles it, and whether to extend it. Read-only. |
 | `agent-sources/fap-fresh-reader/AGENT.md` | Reads the proposal and nothing else, as the reader who wasn't in the conversation: paraphrases it, then reports what it can't follow, what is assumed, and the obvious alternative it doesn't weigh. Read-only. |
 | `agent-sources/fap-impact-analyst/AGENT.md` | Reads the proposal and the code it names and reports what the change would affect that the proposal doesn't say (stored data, flows, contracts) and the assumptions nothing has run yet, for the tracers. Read-only. |
@@ -137,7 +137,7 @@ flowchart LR
   UR -- "approved" --> C["commit by the orchestrator"]
   C --> T["tick tasks, close the log"]
   T -- "next slice: run again" --> S
-  T -- "last slice" --> PR["reviewer's plan review<br/>over the whole diff, its metrics and duplicates;<br/>verifier checks every Done when item"]
+  T -- "last slice" --> PR["reviewer's plan review<br/>over the whole diff and its metrics;<br/>you see the duplicates report;<br/>verifier checks every Done when item"]
 ```
 
 ## Extending it
