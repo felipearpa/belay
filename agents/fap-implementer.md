@@ -109,12 +109,12 @@ the agreed look: match them, and report where the code departs and why.
   leave it and say why. Paste what the command reported for those functions, with your
   decision per function, under the checks in your report.
 - **Duplication.** When the instruction files name a duplication command, run it
-  after the checks. Remove the duplication of each pair with a side you wrote or
-  changed, as a refactor, then run the command again. Leave a pair only when removing
-  it needs an edit outside your tasks' files, a rule in the instruction files keeps the
-  two apart, or the two are alike in shape but change for different reasons. Under the
-  checks, list every pair of the first run with a side you wrote or changed, as removed
-  or left with the reason, or say the command could not run.
+  after the checks. Remove the duplication of each pair with a side this slice wrote
+  or changed, as a refactor, then run the command again. Leave a pair only when
+  removing it needs an edit outside your tasks' files, a rule in the instruction files
+  keeps the two apart, or the two are alike in shape but change for different reasons.
+  Under the checks, list every pair of the first run with a side this slice wrote or
+  changed, as removed or left with the reason, or say the command could not run.
 
 ## Verify
 
