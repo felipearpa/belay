@@ -78,8 +78,7 @@ flowchart TD
   stated that would hold outside the plan.
 - After the last slice, a reviewer reads the whole plan's diff for simplification and
   reuse, and for where it departs from the proposal, and a verifier checks each Done
-  when item against the product. With a duplication command, you also see its report
-  over every file the plan touched.
+  when item against the product.
 
 ## Install
 
@@ -183,7 +182,7 @@ the commit itself.
 | `fap-impact-analyst` | Reads a proposal and the code it touches, and reports what the change would affect that the proposal doesn't say: stored data, existing flows, contracts, and the assumptions nothing has run yet, which become tracers. Read-only. |
 | `fap-implementer` | Implements one slice in small pieces, building after each, and runs every check its tasks name. Reports status per task, files changed, checks run, and open questions. |
 | `fap-verifier` | With a fresh context, reruns every check of a slice and returns pass or fail with evidence, and defects with a reproduction. Writes only the plan's `verification.md`. |
-| `fap-reviewer` | Reads a slice's diff against its plan, or a whole plan's diff for simplification, reuse, and where it departs from the proposal, groups what the code metrics flag as split, test first, or leave, and lists the duplicate pairs the slice left. Read-only. |
+| `fap-reviewer` | Reads a slice's diff against its plan, or a whole plan's diff for simplification, reuse, and where it departs from the proposal, and groups what the code metrics flag as split, test first, or leave. Read-only. |
 
 Each agent is an `agent-sources/<name>/AGENT.md`; `agent-sources/common.md` holds the
 contract they all share, which `build.sh` inserts into each. The plugin, described by
@@ -218,17 +217,16 @@ No test is ever added to lower a score.
 
 A project may also name a duplication command, such as
 [doppel](https://github.com/felipearpa/doppel), which finds pairs of functions with a
-similar structure; the implementer runs its per-change form after its checks and
-removes each copy the slice made, or says why it left one. Before the plan closes, it
-runs once more over every file the plan touched, and you see its report.
+similar structure; the implementer runs it after its checks and removes each copy the
+slice made, or says why it left one.
 
 ## Make it yours
 
 The agents are project-neutral and tool-neutral, so they learn a project from its
 `AGENTS.md` or `CLAUDE.md`. Put there the build and test commands, the testing policy
 (which tests are allowed and which never are), an optional code-metrics command with how
-to read its output and what counts as flagged, an optional duplication command in its two
-forms, per change and per file list, the project's conventions, and links to its docs.
+to read its output and what counts as flagged, an optional duplication command, the
+project's conventions, and links to its docs.
 This repository's own [AGENTS.md](AGENTS.md) is an example.
 
 To add or change a skill or agent, see

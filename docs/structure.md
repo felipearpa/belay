@@ -89,7 +89,7 @@ flowchart LR
 | `agent-sources/common.md` | What every agent follows: priorities (a brief never overrides the project's instruction files or your own rules), how it learns the project, how it returns questions, what it must not touch. |
 | `agent-sources/fap-implementer/AGENT.md` | Builds one slice in pieces, building between pieces, and verifies what the brief names. |
 | `agent-sources/fap-verifier/AGENT.md` | With a fresh context, reruns every check and device flow. The only agent that writes `verification.md`. |
-| `agent-sources/fap-reviewer/AGENT.md` | Reviews a slice against its plan, or the whole diff at the end for simplification and for where it departs from the proposal. When the project has a code-metrics command, groups its flagged functions as split, test first (with the rule named), or leave; when it has a duplication command, lists the pairs the slice left, with why. Never edits. |
+| `agent-sources/fap-reviewer/AGENT.md` | Reviews a slice against its plan, or the whole diff at the end for simplification and for where it departs from the proposal. When the project has a code-metrics command, groups its flagged functions as split, test first (with the rule named), or leave. Never edits. |
 | `agent-sources/fap-reuse-finder/AGENT.md` | Reads the proposal and the code it names and reports what already exists that solves part of it or resembles it, and whether to extend it. Read-only. |
 | `agent-sources/fap-fresh-reader/AGENT.md` | Reads the proposal and nothing else, as the reader who wasn't in the conversation: paraphrases it, then reports what it can't follow, what is assumed, and the obvious alternative it doesn't weigh. Read-only. |
 | `agent-sources/fap-impact-analyst/AGENT.md` | Reads the proposal and the code it names and reports what the change would affect that the proposal doesn't say (stored data, flows, contracts) and the assumptions nothing has run yet, for the tracers. Read-only. |
@@ -114,7 +114,7 @@ The three skills' `allowed-tools` header lets them read `slicing.md` and `templa
 
 | Path | Contents |
 | --- | --- |
-| `AGENTS.md` | Build and test commands, the testing policy (which tests are allowed, which never are, and what a function flagged by code metrics may get), an optional code-metrics command (crapper, or any tool whose output names each function with what it measured) with how to read that output and what counts as flagged, an optional duplication command (doppel) in its two forms, per change and per file list, conventions, links to project docs. The agents receive it in their context; naming the tool and the policy only here is what keeps the agents project-neutral. |
+| `AGENTS.md` | Build and test commands, the testing policy (which tests are allowed, which never are, and what a function flagged by code metrics may get), an optional code-metrics command (crapper, or any tool whose output names each function with what it measured) with how to read that output and what counts as flagged, an optional duplication command (doppel), conventions, links to project docs. The agents receive it in their context; naming the tool and the policy only here is what keeps the agents project-neutral. |
 | `.fap/<slug>/proposal.md` | What is proposed and why, written by fap-explore for a person to read before anything is built: problem (what exists today and for whom), outcome, approach, decisions with the options that lost, out of scope, risks (an assumption nothing has run yet marked `tracer candidate`), open questions, and a Status line (draft, challenged, approved). The challenge agents read it, fap-slice plans from it, and the plan review contrasts the code with it. |
 | `.fap/<slug>/plan.md` | The whole plan: goal (problem and outcome, or a pointer at the proposal with its outcome), done-when items, decisions, out of scope, paths to read first, environment (devices, accounts, backend); then one section per slice, in build order, with the header bullets a person reads (tracer, you will see) and one-line tasks with a `Check` sub-bullet. Decisions taken during the build are appended here, so briefs never depend on a conversation. |
 | `.fap/<slug>/design/*.png` | The agreed look for a plan that changes what the person sees: one render per screen or state, listed under Read first, named by the checks of the screen tasks. Saved by fap-explore when the look is approved there, or by fap-slice. |
@@ -133,11 +133,11 @@ flowchart LR
   R --> V["verifier and reviewer<br/>in parallel"]
   V -- "defects or blocking findings:<br/>fix, re-verify, re-review (max 2 rounds)" --> I
   V -- "still failing after 2 rounds" --> UR
-  V -- "ok" --> UR["user review<br/>metrics and duplicates groups,<br/>adjustments, no limit"]
+  V -- "ok" --> UR["user review<br/>metrics groups, duplicate pairs left,<br/>adjustments, no limit"]
   UR -- "approved" --> C["commit by the orchestrator"]
   C --> T["tick tasks, close the log"]
   T -- "next slice: run again" --> S
-  T -- "last slice" --> PR["reviewer's plan review<br/>over the whole diff and its metrics;<br/>you see the duplicates report;<br/>verifier checks every Done when item"]
+  T -- "last slice" --> PR["reviewer's plan review<br/>over the whole diff and its metrics;<br/>verifier checks every Done when item"]
 ```
 
 ## Extending it

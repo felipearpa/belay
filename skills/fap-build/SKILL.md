@@ -150,10 +150,8 @@ both are read-only over the same file list.
   path of `verification.md`, and that it may write that file and captures under
   `verification/`.
 - The reviewer's brief gives the path of `plan.md`, the slice's tasks, the path of the
-  `.files` list, the code-metrics output the implementer's report carries when there is
-  any, and, when the project names a duplication command, what that report says of it:
-  each pair it left with a side in the `.files` list, with its reason, "none", or that
-  the command could not run.
+  `.files` list, and the code-metrics output the implementer's report carries when
+  there is any.
 
 Wait for both and fill the Verifier and Reviewer sections of the log. Advisory findings
 go to the log without asking the user; the plan review in step 11 reconsiders them with
@@ -199,9 +197,9 @@ approve, or what to adjust?
 - **Metrics**, only when the project has a metrics command: the reviewer's
   code-metrics groups (split, test first, leave); when three or more functions are
   flagged and the command prints a map, paste the map as printed, never redrawn
-- **Duplicates**, only when the project has a duplication command: the reviewer's
-  Duplicates group as it wrote it, not a count, or "not run" when the command didn't
-  run
+- **Duplicates**, only when the project has a duplication command: the pairs the
+  implementer left, each with its reason, from its last report, or "not run" when the
+  command didn't run
 - **Files**: the count and the path of the slice's `.files` list
 
 Then wait for the user's answer.
@@ -277,11 +275,7 @@ the next one. If this was the last slice, go to step 11.
 
 ## 11. Plan review
 
-After the last slice, when the instruction files name a duplication command, run its
-file-list form once from the repository root over the union of every slice's `.files`
-list, and show the user its output as printed, right away, never in an agent's brief.
-Without a duplication command, say nothing about duplicates. Then start at the same
-time:
+After the last slice, start at the same time:
 
 - one `fap-reviewer` agent with
   - the path of `plan.md`,
